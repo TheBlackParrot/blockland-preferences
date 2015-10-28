@@ -1,8 +1,5 @@
 if(!isObject(PreferenceContainerGroup)) {
 	new ScriptGroup(PreferenceContainerGroup);
-} else {
-	PreferenceContainerGroup.deleteAll();
-	// might need to switch to a for loop, I find this to not delete everything occasionally
 }
 
 $Pref::BLPrefs::ServerDebug = true;
