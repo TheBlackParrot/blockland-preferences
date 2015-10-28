@@ -8,5 +8,5 @@ function RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %r
 		case "bool":
 			%type = "boolean";
 	}
-	registerBlocklandPref(%addon, %name, %type, "$" @ %variable, %default, getWords(%params, 1), %callback);
+	registerBlocklandPref(%addon, %name, %type, "$" @ %variable, %default, getWords(%params, 1), %callback, "bricks");
 }
