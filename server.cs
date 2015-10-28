@@ -5,6 +5,12 @@ if(!isObject(PreferenceContainerGroup)) {
 	// might need to switch to a for loop, I find this to not delete everything occasionally
 }
 
+$Pref::BLPrefs::ServerDebug = true;
+$BLPrefs::Version = "0.0-dev";
+
+exec("./compatibility.cs");
+exec("./handshake.cs");
+
 function registerBlocklandPref(%addon, %title, %type, %variable, %default, %params, %callback)
 {
 	%valid = ":integer:string:slider:boolean:list";
