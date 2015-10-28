@@ -47,16 +47,40 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 		case "integer":
 			%pref.minValue = getField(%params, 0);
 			%pref.maxValue = getField(%params, 1);
+			%pref.decimalPoints = getField(%params, 2); //differentiate between integers and floats?
+
+			if(%pref.defaultValue < %pref.minValue)
+			{
+				%pref.defaultValue = %pref.minValue;
+			}
+			else if(%pref.defaultValue > %pref.maxValue)
+			{
+				%pref.defaultValue = %pref.maxValue;
+			}
 
 		case "string":
 			%pref.maxLength = getField(%params, 0);
 			%pref.stripML = getField(%params, 1);
+
+			if(strlen(%pref.defaultValue) > %pref.maxLength)
+			{
+				%pref.defaultValue = getSubStr(%pref.defaultValue, 0, %pref.maxLength);
+			}
 
 		case "slider":
 			%pref.minValue = getField(%params, 0);
 			%pref.maxValue = getField(%params, 1);
 			%pref.snapTo = getField(%params, 2);
 			%pref.stepValue = getField(%params, 3);
+
+			if(%pref.defaultValue < %pref.minValue)
+			{
+				%pref.defaultValue = %pref.minValue;
+			}
+			else if(%pref.defaultValue > %pref.maxValue)
+			{
+				%pref.defaultValue = %pref.maxValue;
+			}
 
 		case "boolean":
 			if(%pref.defaultValue > 1)
