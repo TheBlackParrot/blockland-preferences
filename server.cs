@@ -47,6 +47,7 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 		case "integer":
 			%pref.minValue = getField(%params, 0);
 			%pref.maxValue = getField(%params, 1);
+			%pref.decimalPoints = getField(%params, 2); //differentiate between integers and floats?
 
 		case "string":
 			%pref.maxLength = getField(%params, 0);
