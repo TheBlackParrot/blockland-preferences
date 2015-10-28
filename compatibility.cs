@@ -9,5 +9,5 @@ function RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %r
 			%type = "boolean";
 	}
 	// some prefs have "$", some don't
-	registerBlocklandPref(%addon, %name, %type, "$" @ strReplace(%variable, "$", ""), %default, getWords(%params, 1), %callback, "bricks");
+	registerBlocklandPref(%addon, %name, %type, "$" @ strReplace(%variable, "$", ""), %default, getWords(%params, 1), %callback, "bricks", 1);
 }

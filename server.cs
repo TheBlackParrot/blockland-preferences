@@ -9,13 +9,15 @@ exec("./compatibility.cs");
 exec("./handshake.cs");
 exec("./interaction.cs");
 
-function registerBlocklandPref(%addon, %title, %type, %variable, %default, %params, %callback, %icon)
+function registerBlocklandPref(%addon, %title, %type, %variable, %default, %params, %callback, %icon, %legacy)
 {
 	// using famfamfam's silk icons. use an icon filename minus the extension for %icon
 	// RTB prefs will use the old RTB icon by default
 
 	// the server will not need them, only the soon-to-be client(s) will
 	// if there's a way to send icons to clients without clients having it, by all means, please add that
+
+	// %leagacy = 1 if it's added via a compatibility wrapper
 
 	%valid = ":integer:string:slider:boolean:list";
 	// possible future entries?: color (hex, rgb, set (via params)), time
@@ -36,6 +38,7 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 		callback = %callback;
 		params = %params;
 		icon = %icon;
+		legacy = %legacy;
 	};
 
 	// use this for server-sided validation?
