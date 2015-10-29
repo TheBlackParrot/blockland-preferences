@@ -19,7 +19,7 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 
 	// %leagacy = 1 if it's added via a compatibility wrapper
 
-	%valid = ":integer:string:slider:boolean:list";
+	%valid = ":number:string:slider:boolean:list";
 	// possible future entries?: color (hex, rgb, set (via params)), time
 	if(stripos(%valid, ":" @ %type) == -1)
 	{
@@ -44,10 +44,10 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 	// use this for server-sided validation?
 	switch$(%type)
 	{
-		case "integer":
+		case "number":
 			%pref.minValue = getField(%params, 0);
 			%pref.maxValue = getField(%params, 1);
-			%pref.decimalPoints = getField(%params, 2); //differentiate between integers and floats?
+			%pref.decimalPoints = getField(%params, 2);
 
 			if(%pref.defaultValue < %pref.minValue)
 			{

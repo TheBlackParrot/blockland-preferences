@@ -3,7 +3,7 @@ function RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %r
 	%type = getWord(%params, 0);
 	switch$(%type) {
 		case "int" or "num" or "float":
-			%type = "integer";
+			%type = "number";
 
 		case "bool":
 			%type = "boolean";
