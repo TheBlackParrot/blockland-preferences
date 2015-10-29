@@ -46,6 +46,7 @@ function serverCmdGetBLPrefCategory(%client, %category) {
 			}
 		}
 	}
+	commandToClient(%client, 'finishReceivePref');
 }
 //clientCmdAddPref(%addon, %title, %type, %variable, %value, %params, %icon)
 //commandToClient(%client, 'addPref', %row.category, %row.title, %row.type, %row.variable, eval("return" SPC %row.variable @ ";"), %row.params, %row.icon);
