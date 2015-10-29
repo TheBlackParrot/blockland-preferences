@@ -19,7 +19,7 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 
 	// %leagacy = 1 if it's added via a compatibility wrapper
 
-	%valid = ":number:string:slider:boolean:list";
+	%valid = ":number:string:slider:boolean:list:password";
 	// possible future entries?: color (hex, rgb, set (via params)), time
 	if(stripos(%valid, ":" @ %type) == -1)
 	{
@@ -58,7 +58,7 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 				%pref.defaultValue = %pref.maxValue;
 			}
 
-		case "string":
+		case "string" or "password":
 			%pref.maxLength = getField(%params, 0);
 			%pref.stripML = getField(%params, 1);
 
@@ -105,3 +105,7 @@ function BlocklandPrefSO::onAdd(%obj)
 
 	PreferenceContainerGroup.add(%obj);
 }
+
+// add a wrapper to execute everything in the prefs folder
+// will be used for older addons without prefs, if asked for them
+exec("./prefs/general.cs");
