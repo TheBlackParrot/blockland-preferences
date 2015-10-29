@@ -1,3 +1,8 @@
+// ---=== Blockland Preference System ===---
+// -- Contributors:
+//    -- TheBlackParrot (BL_ID 18701)
+//    -- Jincux (BL_ID 9789)
+
 if(!isObject(PreferenceContainerGroup)) {
 	new ScriptGroup(PreferenceContainerGroup);
 }
@@ -108,4 +113,6 @@ function BlocklandPrefSO::onAdd(%obj)
 
 // add a wrapper to execute everything in the prefs folder
 // will be used for older addons without prefs, if asked for them
-exec("./prefs/general.cs");
+if(!$BLPrefs::AddedServerSettings) {
+	exec("./prefs/general.cs");
+}
