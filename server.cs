@@ -116,3 +116,5 @@ function BlocklandPrefSO::onAdd(%obj)
 if(!$BLPrefs::AddedServerSettings) {
 	exec("./prefs/general.cs");
 }
+
+$BLPrefs::Init = true;
