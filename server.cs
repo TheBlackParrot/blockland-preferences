@@ -3,6 +3,15 @@
 //    -- TheBlackParrot (BL_ID 18701)
 //    -- Jincux (BL_ID 9789)
 
+if($BLPrefs::didPreload && !$BLPrefs::Debug) {
+	echo("Preferences already preloaded, nothing to do here.");
+	return;
+} else if(!$BLPrefs::PreLoad) {
+	warn("Preloader wasn't installed. Some prefs may not be available.");
+} else if($BLPrefs::Debug) {
+	warn("Re-executing, development mode");
+}
+
 if(!isObject(PreferenceContainerGroup)) {
 	new ScriptGroup(PreferenceContainerGroup);
 }
