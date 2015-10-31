@@ -7,10 +7,16 @@ package BLPrefServerPackage {
 				if($Pref::BLPrefs::ServerDebug) {
 					echo("\c4" @ %this.name SPC "has the pref system. (version" SPC getField(%line, 1) @ ")");
 				}
-				commandToClient(%this, 'hasPrefSystem', $BLPrefs::Version);
+				break;
 			}
 		}
 		return parent::onConnectRequest(%this, %a, %b, %c, %d, %e, %f, %g, %us, %i, %j, %k, %l, %m, %n, %o, %p);
+	}
+
+	function GameConnection::autoAdminCheck(%client) {
+		%admin = parent::autoAdminCheck(%client);
+		commandToClient(%client, 'hasPrefSystem', $BLPrefs::Version, %admin); //let them know if they have permission to use it; assume that admin is permission for now?
+		return %admin;
 	}
 };
 activatePackage(BLPrefServerPackage);
