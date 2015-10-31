@@ -10,6 +10,7 @@ if(!isObject(PreferenceContainerGroup)) {
 $Pref::BLPrefs::ServerDebug = true;
 $BLPrefs::Version = "0.0-dev";
 
+exec("./functions.cs");
 exec("./compatibility.cs");
 exec("./handshake.cs");
 exec("./interaction.cs");
@@ -36,6 +37,26 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 		return;
 	}
 
+	%groupName = BLP_alNum(%addon) @ "Prefs";
+	if(!isObject(%groupName)) {
+		%group = new ScriptGroup(BlocklandPrefGroup) {
+			class = "PreferenceGroup";
+			title = BLP_alNum(%addon);
+			legacy = %legacy;
+			category = %addon;
+			icon = %icon;
+		};
+	} else {
+		%group = (%groupName).getID();
+	}
+
+	for(%i=0;%i<%group.getCount();%i++) {
+		if(%variable $= %group.getObject(%i).variable) {
+			echo("\c4" @ %variable SPC "has already been registered, skipping...");
+			return;
+		}
+	}
+
 	%pref = new scriptObject(BlocklandPrefSO)
 	{
 		class = "Preference";
@@ -49,6 +70,7 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 		icon = %icon;
 		legacy = %legacy;
 	};
+	%group.add(%pref);
 
 	// use this for server-sided validation?
 	switch$(%type)
@@ -111,8 +133,11 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 function BlocklandPrefSO::onAdd(%obj)
 {
 	%obj.setName("");
+}
 
-	PreferenceContainerGroup.add(%obj);
+function BlocklandPrefGroup::onAdd(%this) {
+	%this.setName(%this.title @ "Prefs");
+	PreferenceContainerGroup.add(%this);
 }
 
 // add a wrapper to execute everything in the prefs folder

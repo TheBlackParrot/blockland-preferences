@@ -10,21 +10,19 @@ function serverCmdGetBLPrefCategories(%client) {
 		return;
 	}
 
-	%found = "";
+	// the groups made things SO MUCH SIMPLER
 	for(%i=0;%i<%group.getCount();%i++) {
 		%row = %group.getObject(%i);
-		if(stripos(%found, ":" @ %row.category) == -1) {
-			if($Pref::BLPrefs::ServerDebug) {
-				echo("\c4Sending" SPC %row.category @ "...");
-			}
-			%found = ":" @ %row.category @ %found;
-			commandToClient(%client, 'addCategory', %row.category, %row.icon);
+		if($Pref::BLPrefs::ServerDebug) {
+			echo("\c4Sending" SPC %row.category @ "...");
 		}
+		commandToClient(%client, 'addCategory', %row.category, %row.icon);
 	}
 }
 
 function serverCmdGetBLPrefCategory(%client, %category) {
-	%group = PreferenceContainerGroup;
+	//%group = PreferenceContainerGroup;
+	%group = (BLP_alNum(%category) @ "Prefs");
 	if(!isObject(%group)) {
 		echo("\c4" @ %client.name SPC "requested preferences, but the container group doesn't exist. This shouldn't be happening.");
 		return;
@@ -37,13 +35,11 @@ function serverCmdGetBLPrefCategory(%client, %category) {
 
 	for(%i=0;%i<%group.getCount();%i++) {
 		%row = %group.getObject(%i);
-		if(%row.category $= %category) {
-			if(!%first) {
-				%first = true;
-				commandToClient(%client, 'receivePref', %row.title, %row.type, %row.variable, eval("return" SPC %row.variable @ ";"), %row.params, %row.legacy);
-			} else {
-				commandToClient(%client, 'receivePref', %row.title, %row.type, %row.variable, eval("return" SPC %row.variable @ ";"), %row.params);
-			}
+		if(!%first) {
+			%first = true;
+			commandToClient(%client, 'receivePref', %row.title, %row.type, %row.variable, eval("return" SPC %row.variable @ ";"), %row.params, %row.legacy);
+		} else {
+			commandToClient(%client, 'receivePref', %row.title, %row.type, %row.variable, eval("return" SPC %row.variable @ ";"), %row.params);
 		}
 	}
 	commandToClient(%client, 'finishReceivePref');
