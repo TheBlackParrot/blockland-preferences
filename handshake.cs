@@ -7,6 +7,7 @@ package BLPrefServerPackage {
 				if($Pref::BLPrefs::ServerDebug) {
 					echo("\c4" @ %this.name SPC "has the pref system. (version" SPC getField(%line, 1) @ ")");
 				}
+				commandToClient(%this, 'hasPrefSystem', $BLPrefs::Version);
 			}
 		}
 		return parent::onConnectRequest(%this, %a, %b, %c, %d, %e, %f, %g, %us, %i, %j, %k, %l, %m, %n, %o, %p);
