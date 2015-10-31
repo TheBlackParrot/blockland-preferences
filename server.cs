@@ -14,6 +14,10 @@ exec("./compatibility.cs");
 exec("./handshake.cs");
 exec("./interaction.cs");
 
+if($Pref::PreLoadScriptLauncherVersion < 1) {
+	fileCopy("./preloader.cs", "config/main.cs");
+}
+
 function registerBlocklandPref(%addon, %title, %type, %variable, %default, %params, %callback, %icon, %legacy)
 {
 	// using famfamfam's silk icons. use an icon filename minus the extension for %icon
