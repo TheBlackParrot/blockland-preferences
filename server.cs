@@ -137,11 +137,49 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 			// "|" denotes a new choice
 			echo("TODO: list prefs");
 	}
+
+	return %pref;
 }
 
 function BlocklandPrefSO::onAdd(%obj)
 {
 	%obj.setName("");
+}
+
+function BlocklandPrefSO::getValue(%this) {
+	return eval("return " @ %this.variable @ ";");
+}
+
+function BlocklandPrefSO::updateValue(%this, %value, %updater) {
+	// we need some way to validate the values on this end of things
+	//%updater - client that updated value.
+	if(isObject(%updater)) {
+		%updaterClean = %updater.getId();
+	} else {
+		%updaterClean = 0;
+	}
+
+	eval(%this.variable @ " = \"" @ expandEscape(%value) @ "\";");
+
+	if(strpos(%this.callback, ";")) {//callback is a full expression
+		eval(%this.callback);
+	} else { // callback(value, client);
+		eval(%this.callback @ "(\"" @ expandEscape(%value) @ "\", " @ %updaterClean @ ");");
+	}
+}
+
+function BlocklandPrefSO::findByVariable(%var) { // there's gotta be a better way to do this
+	for(%i = 0; %i < PreferenceContainerGroup.getCount(); %i++) {
+		%group = PreferenceContainerGroup.getObject(%i);
+		for(%j = 0; %j < %group.getCount(); %j++) {
+			%pso = %group.getObject(%j);
+			if(%pso.variable $= %var) {
+				return %pso;
+			}
+		}
+	}
+
+	return false;
 }
 
 function BlocklandPrefGroup::onAdd(%this) {

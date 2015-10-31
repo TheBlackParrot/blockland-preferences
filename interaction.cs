@@ -46,3 +46,20 @@ function serverCmdGetBLPrefCategory(%client, %category) {
 }
 //clientCmdAddPref(%addon, %title, %type, %variable, %value, %params, %icon)
 //commandToClient(%client, 'addPref', %row.category, %row.title, %row.type, %row.variable, eval("return" SPC %row.variable @ ";"), %row.params, %row.icon);
+
+function serverCmdupdateBLPref(%client, %varname, %newvalue) {
+	//validate!
+
+	//we need to find the object
+	%pso = BlocklandPrefSO::findByVariable(%varname);
+	if(%pso) {
+		%pso.updateValue(%newvalue, %client);
+
+		if($Pref::BLPrefs::ServerDebug) {
+			echo("\c4" @ %client.netname @ " set " @ %varname @ " to " @ %newvalue);
+		}
+	} else {
+		//so they tried to update a variable that doesn't exist...
+		warn("Variable \"" @ %varname @ "\" doesn't exist!");
+	}
+}

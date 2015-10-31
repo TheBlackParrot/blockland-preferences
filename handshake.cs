@@ -18,5 +18,13 @@ package BLPrefServerPackage {
 		commandToClient(%client, 'hasPrefSystem', $BLPrefs::Version, %admin); //let them know if they have permission to use it; assume that admin is permission for now?
 		return %admin;
 	}
+
+	function deactivateServerPackages() { //preload fix
+		parent::deactivateServerPackages();
+		if($Server::Dedicated) {
+			activatePackage(BLPrefServerPackage);
+			activatePackage(BLPrefCompatibilityPackage);
+		}
+	}
 };
 activatePackage(BLPrefServerPackage);
