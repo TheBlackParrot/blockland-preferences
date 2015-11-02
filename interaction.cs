@@ -58,6 +58,13 @@ function serverCmdupdateBLPref(%client, %varname, %newvalue) {
 		if($Pref::BLPrefs::ServerDebug) {
 			echo("\c4" @ %client.netname @ " set " @ %varname @ " to " @ %newvalue);
 		}
+
+		for(%i = 0; %i < ClientGroup.getCount(); %i++) {
+			%cl = ClientGroup.getObject(%i);
+			if(%cl.hasPrefSystem && %cl.isAdmin) {
+				commandToClient(%cl, 'updateBLPref', %varname, %newvalue);
+			}
+		}
 	} else {
 		//so they tried to update a variable that doesn't exist...
 		warn("Variable \"" @ %varname @ "\" doesn't exist!");
