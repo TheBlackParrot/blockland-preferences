@@ -38,6 +38,24 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 
 	// %leagacy = 1 if it's added via a compatibility wrapper
 
+	// shorthand types
+	switch$(%type) {
+		case "bool" or "tf":
+			%type = "boolean";
+
+		case "num" or "int" or "float" or "real":
+			%type = "number";
+
+		case "str":
+			%type = "string";
+
+		case "slide" or "range":
+			%type = "slider";
+			
+		case "choice" or "choices":
+			%type = "list";
+	}
+
 	%valid = ":number:string:slider:boolean:list:password";
 	// possible future entries?: color (hex, rgb, set (via params)), time
 	if(stripos(%valid, ":" @ %type) == -1)
