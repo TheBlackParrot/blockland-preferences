@@ -130,12 +130,28 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 				%pref.defaultValue = 0;
 
 		case "list":
+			// TS needs an explode function ffs
+			%count = 0;
+			while(strLen(%params)) {
+				%pos = stripos(%params, "|");
+				%row = getSubStr(%params, 0, %pos);
+
+				%pref.rowName[%count] = getSubStr(%row, 0, stripos(%row, "**"));
+				%pref.rowValue[%count] = getSubStr(%row, stripos(%row, "**")+2, strLen(%row));
+
+				%count++;
+
+				if(stripos(%params, "|") != -1) {
+					%params = getSubStr(%params, stripos(%params, "|")+1, strLen(%params))
+				} else {
+					%params = "";
+				}
+			}
+			%pref.listCount = %count;
 			// "Host**4|Super Admin**3|Admin**2|All**1"
 
-			// string nonsense to separate the list
 			// "**" denotes the separation of the visible part and the value of the variable
 			// "|" denotes a new choice
-			echo("TODO: list prefs");
 	}
 
 	return %pref;
