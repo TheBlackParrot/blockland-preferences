@@ -53,6 +53,7 @@ function serverCmdupdateBLPref(%client, %varname, %newvalue) {
 	//we need to find the object
 	%pso = BlocklandPrefSO::findByVariable(%varname);
 	if(%pso) {
+		%newvalue = %pso.validateValue(%newvalue);
 		%pso.updateValue(%newvalue, %client);
 
 		if($Pref::BLPrefs::ServerDebug) {

@@ -168,6 +168,47 @@ function BlocklandPrefSO::updateValue(%this, %value, %updater) {
 	}
 }
 
+function BlocklandPrefSO::validateValue(%this, %value) {
+	// this is where the SO's come in handy
+	switch$(%this.type) {
+		case "number":
+			%value = mFloatLength(%value, %this.decimalPoints);
+			if(%value < %this.minValue) {
+				%value = %this.minValue;
+			}
+			else if(%value > %this.maxValue){
+				%value = %this.maxValue;
+			}
+
+		case "string" or "password":
+			if(strlen(%value) > %this.maxLength) {
+				%value = getSubStr(%value, 0, %this.maxLength);
+			}
+			if(%this.stripML) {
+				%value = stripMLControlChars(%value);
+			}
+
+		case "slider":
+			if(%value < %this.minValue) {
+				%value = %this.minValue;
+			}
+			else if(%value > %this.maxValue){
+				%value = %this.maxValue;
+			}
+
+			%value -= (%value % %this.snapTo);
+
+		case "boolean":
+			if(%value > 1)
+				%value = 1;
+
+			if(%value < 0)
+				%value = 0;
+
+	}
+	return %value;
+}
+
 function BlocklandPrefSO::findByVariable(%var) { // there's gotta be a better way to do this
 	for(%i = 0; %i < PreferenceContainerGroup.getCount(); %i++) {
 		%group = PreferenceContainerGroup.getObject(%i);
