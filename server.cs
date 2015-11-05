@@ -161,10 +161,10 @@ function BlocklandPrefSO::updateValue(%this, %value, %updater) {
 
 	eval(%this.variable @ " = \"" @ expandEscape(%value) @ "\";");
 
-	if(strpos(%this.callback, ";")) {//callback is a full expression
+	if(strpos(%this.callback, ";") != -1) {//callback is a full expression
 		eval(%this.callback);
-	} else { // callback(value, client);
-		eval(%this.callback @ "(\"" @ expandEscape(%value) @ "\", " @ %updaterClean @ ");");
+	} else { // callback(value, client, pref object);
+		eval(%this.callback @ "(\"" @ expandEscape(%value) @ "\", " @ %updaterClean @ ", " @ %this.getId() @ ");");
 	}
 }
 
