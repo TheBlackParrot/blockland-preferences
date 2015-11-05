@@ -16,5 +16,10 @@ package BLPrefCompatibilityPackage {
 		if(isFunction("RTB_registerPref"))
 			parent::RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback);
 	}
+
+	// because oRBs is the same thing at this point -_-
+	function oRBs_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback) {
+		RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback)
+	}
 };
 activatePackage(BLPrefCompatibilityPackage);
