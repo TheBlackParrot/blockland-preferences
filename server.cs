@@ -51,7 +51,7 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 
 		case "slide" or "range":
 			%type = "slider";
-			
+
 		case "choice" or "choices":
 			%type = "list";
 	}
@@ -160,7 +160,7 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 				%count++;
 
 				if(stripos(%params, "|") != -1) {
-					%params = getSubStr(%params, stripos(%params, "|")+1, strLen(%params))
+					%params = getSubStr(%params, stripos(%params, "|")+1, strLen(%params));
 				} else {
 					%params = "";
 				}
