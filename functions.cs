@@ -17,3 +17,23 @@ function BLP_alNum(%str) {
 
 	return %str;
 }
+
+function GameConnection::BLP_isAllowedUse(%this) {
+	switch($Pref::BLPrefs::AllowedRank) {
+		case 3:
+			if(%this.bl_id == 999999 || %this.bl_id == getNumKeyID()) {
+				return 1;
+			}
+
+		case 2:
+			if(%this.isSuperAdmin) {
+				return 1;
+			}
+
+		case 1:
+			if(%this.isAdmin) {
+				return 1;
+			}
+	}
+	return 0;
+}

@@ -5,8 +5,7 @@ function serverCmdGetBLPrefCategories(%client) {
 		return;
 	}
 
-	if(!%client.isSuperAdmin) {
-		// for now
+	if(!%client.BLP_isAllowedUse()) {
 		return;
 	}
 
@@ -28,8 +27,7 @@ function serverCmdGetBLPrefCategory(%client, %category) {
 		return;
 	}
 
-	if(!%client.isSuperAdmin) {
-		// for now
+	if(!%client.BLP_isAllowedUse()) {
 		return;
 	}
 
@@ -58,6 +56,10 @@ function serverCmdupdateBLPref(%client, %varname, %newvalue) {
 
 		if($Pref::BLPrefs::ServerDebug) {
 			echo("\c4" @ %client.netname @ " set " @ %varname @ " to " @ %newvalue);
+		}
+
+		if($Pref::BLPrefs::AnnounceChanges) {
+			messageAll('MsgAdminForce', "\c3" @ %client.netname SPC "\c6set\c3" SPC %pso.title SPC "\c6to\c3" SPC %newvalue);
 		}
 
 		for(%i = 0; %i < ClientGroup.getCount(); %i++) {
