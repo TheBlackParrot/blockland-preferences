@@ -96,6 +96,7 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 		params = %params;
 		icon = %icon;
 		legacy = %legacy;
+		announce = true;
 	};
 	%group.add(%pref);
 

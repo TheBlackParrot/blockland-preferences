@@ -28,12 +28,6 @@ registerServerSettingPrefs();
 
 function updateServerSetting(%value, %client, %prefSO) {
 	%title = %prefSO.title;
-	if(%title $= "Server Name") {
-		messageAll('MsgAdminForce', "\c0 + \c3" @ %client.netname @ "\c0 updated the server name to \c3" @ %value);
-	} else {
-		//temporary!
-		messageAll('', " + \c3" @ %title @ "\c0 was set to \c3" @ expandEscape(%value));
-	}
 
 	if(%title $= "Server Name" || %title $= "Maximum Players" || %title $= "Server Password") {
 		webcom_postserver();

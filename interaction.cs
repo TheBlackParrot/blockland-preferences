@@ -58,8 +58,8 @@ function serverCmdupdateBLPref(%client, %varname, %newvalue) {
 			echo("\c4" @ %client.netname @ " set " @ %varname @ " to " @ %newvalue);
 		}
 
-		if($Pref::BLPrefs::AnnounceChanges) {
-			messageAll('MsgAdminForce', "\c3" @ %client.netname SPC "\c6set\c3" SPC %pso.title SPC "\c6to\c3" SPC %newvalue);
+		if($Pref::BLPrefs::AnnounceChanges && %pso.announce && %pso.type !$= "password") {
+			messageAll('MsgAdminForce', " + \c3" @ %client.netname SPC "\c6set\c3" SPC %pso.title SPC "\c6to\c3" SPC expandEscape(%newvalue));
 		}
 
 		for(%i = 0; %i < ClientGroup.getCount(); %i++) {
