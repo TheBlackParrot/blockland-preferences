@@ -12,8 +12,12 @@ package BLPrefCompatibilityPackage {
 	}
 
 	// because oRBs is the same thing at this point -_-
+	// so much for "innovation", amirite?
 	function oRBs_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback) {
-		RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback)
+		RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback);
+
+		if(isFunction("oRBs_registerPref"))
+			parent::oRBs_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback);
 	}
 };
 activatePackage(BLPrefCompatibilityPackage);

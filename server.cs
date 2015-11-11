@@ -104,9 +104,9 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 	switch$(%type)
 	{
 		case "number":
-			%pref.minValue = getField(%params, 0);
-			%pref.maxValue = getField(%params, 1);
-			%pref.decimalPoints = getField(%params, 2);
+			%pref.minValue = getWord(%params, 0);
+			%pref.maxValue = getWord(%params, 1);
+			%pref.decimalPoints = getWord(%params, 2);
 
 			if(%pref.defaultValue < %pref.minValue)
 			{
@@ -118,8 +118,8 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 			}
 
 		case "string" or "password":
-			%pref.maxLength = getField(%params, 0);
-			%pref.stripML = getField(%params, 1);
+			%pref.maxLength = getWord(%params, 0);
+			%pref.stripML = getWord(%params, 1);
 
 			if(strlen(%pref.defaultValue) > %pref.maxLength)
 			{
@@ -127,10 +127,10 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 			}
 
 		case "slider":
-			%pref.minValue = getField(%params, 0);
-			%pref.maxValue = getField(%params, 1);
-			%pref.snapTo = getField(%params, 2);
-			%pref.stepValue = getField(%params, 3);
+			%pref.minValue = getWord(%params, 0);
+			%pref.maxValue = getWord(%params, 1);
+			%pref.snapTo = getWord(%params, 2);
+			%pref.stepValue = getWord(%params, 3);
 
 			if(%pref.defaultValue < %pref.minValue)
 			{
@@ -207,11 +207,13 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 	// this is where the SO's come in handy
 	switch$(%this.type) {
 		case "number":
-			%value = mFloatLength(%value, %this.decimalPoints);
+			if(%this.decimalPoints !$= "") {
+				%value = mFloatLength(%value, %this.decimalPoints);
+			}
+
 			if(%value < %this.minValue) {
 				%value = %this.minValue;
-			}
-			else if(%value > %this.maxValue){
+			}	else if(%value > %this.maxValue){
 				%value = %this.maxValue;
 			}
 
@@ -267,6 +269,7 @@ function BlocklandPrefGroup::onAdd(%this) {
 // will be used for older addons without prefs, if asked for them
 if(!$BLPrefs::AddedServerSettings) {
 	exec("./prefs/general.cs");
+	exec("./prefs/blprefs.cs");
 }
 
 $BLPrefs::Init = true;
