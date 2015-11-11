@@ -59,7 +59,12 @@ function serverCmdupdateBLPref(%client, %varname, %newvalue) {
 		}
 
 		if($Pref::BLPrefs::AnnounceChanges && %pso.announce && %pso.type !$= "password") {
-			messageAll('MsgAdminForce', " + \c3" @ %client.netname SPC "\c6set\c3" SPC %pso.title SPC "\c6to\c3" SPC expandEscape(%newvalue));
+			if(%pso.type $= "list") {
+				%displayValue = %pso.valueName[%newvalue];
+			} else {
+				%displayValue = expandEscape(%newvalue);
+			}
+			messageAll('MsgAdminForce', "\c6 + \c3" @ %client.netname SPC "\c6set\c3" SPC %pso.title SPC "\c6to\c3" SPC %displayValue);
 		}
 
 		for(%i = 0; %i < ClientGroup.getCount(); %i++) {

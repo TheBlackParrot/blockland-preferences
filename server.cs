@@ -157,6 +157,7 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 
 				%pref.rowName[%count] = getSubStr(%row, 0, stripos(%row, "**"));
 				%pref.rowValue[%count] = getSubStr(%row, stripos(%row, "**")+2, strLen(%row));
+				%pref.valueName[%pref.rowValue[%count]] = %pref.rowName[%count];
 
 				%count++;
 
@@ -196,10 +197,12 @@ function BlocklandPrefSO::updateValue(%this, %value, %updater) {
 
 	eval(%this.variable @ " = \"" @ expandEscape(%value) @ "\";");
 
-	if(strpos(%this.callback, ";") != -1) {//callback is a full expression
-		eval(%this.callback);
-	} else { // callback(value, client, pref object);
-		eval(%this.callback @ "(\"" @ expandEscape(%value) @ "\", " @ %updaterClean @ ", " @ %this.getId() @ ");");
+	if(%this.callback !$= "") {
+		if(strpos(%this.callback, ";") != -1) {//callback is a full expression
+			eval(%this.callback);
+		} else { // callback(value, client, pref object);
+			eval(%this.callback @ "(\"" @ expandEscape(%value) @ "\", " @ %updaterClean @ ", " @ %this.getId() @ ");");
+		}
 	}
 }
 
