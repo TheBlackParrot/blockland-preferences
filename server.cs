@@ -28,6 +28,20 @@ if($Pref::PreLoadScriptLauncherVersion < 1) {
 	fileCopy("./preloader.cs", "config/main.cs");
 }
 
+// Chrisbot6's big list of complaints about your pref format:
+// - %perams is a terrible idea and people will have a thousand different formats for that variable. Decide what you actually want from your system.
+// - registerBlocklandPref should just be registerPref.
+// - Your values should be most important first, not jumbled up like this.
+// - %addon is ambiguous. Do you want a folder name or what? %category would be better.
+// - %icon should allow the user to use icons from anywhere, not just your little list. What are you, Microsoft?
+// - %type is more than one word is every pref format except yours. Where am I supposed to pass in how a type is handled? %perams? If so, where do I put subcategories? You're not thinking at all about
+//   how things will look on the other end.
+// - %legacy shoudn't be needed and only proves your pref format is near impossible to convert to due to how different you've made it.
+// - Stop using nonstandard list delimiters because "it's easier for users". Torque is MORE THAN based around words and fields.
+// - You don't need shorthand. It just confuses things more. If someone registers with an invalid type, just show them an error or a string box and move on.
+// - Do not overstandardize values. You're limiting yourselves and your users. It's perfectly acceptable to have types for specific purposes, such as RTB's playerlist and datablock, and
+//   my wordlist and bl_idlist.
+
 function registerBlocklandPref(%addon, %title, %type, %variable, %default, %params, %callback, %icon, %legacy)
 {
 	// using famfamfam's silk icons. use an icon filename minus the extension for %icon
@@ -183,7 +197,7 @@ function BlocklandPrefSO::onAdd(%obj)
 }
 
 function BlocklandPrefSO::getValue(%this) {
-	return eval("return " @ %this.variable @ ";");
+	return getGlobalByName(%this.variable); //eval("return " @ %this.variable @ ";");
 }
 
 function BlocklandPrefSO::updateValue(%this, %value, %updater) {
@@ -195,14 +209,23 @@ function BlocklandPrefSO::updateValue(%this, %value, %updater) {
 		%updaterClean = 0;
 	}
 
-	eval(%this.variable @ " = \"" @ expandEscape(%value) @ "\";");
+	setGlobalByName(%this.variable, %value); //eval(%this.variable @ " = \"" @ expandEscape(%value) @ "\";");
 
+	// the code below bothers me.
+	// 1. Why let people put in full expressions for their callbacks? This isn't what a callback is. A callback should have a standardized format and should find what it needs when it runs.
+	//    You're giving the user the same pointless burden of responsibility as guiCtrl commands do. Just assume the callback's a function name in a string and nothing more.
+	// 2. Why are you using eval here? Just use call(functionName, [args]..), it's a lot easier and you don't have to compile or expand escapes.
+	// 3. You don't need to use getID to pass an object to a function. An object reference is essentially an object id, and vice versa. Try putting "hammerItem" in a string and calling .getName()
+	//    or .getId();. Torque looks for them.
+	
+	// I've made a change suggestion here but I'm not sure what you'll think. Take or leave.
+	
+	// - Chrisbot6
+	
 	if(%this.callback !$= "") {
-		if(strpos(%this.callback, ";") != -1) {//callback is a full expression
-			eval(%this.callback);
-		} else { // callback(value, client, pref object);
-			eval(%this.callback @ "(\"" @ expandEscape(%value) @ "\", " @ %updaterClean @ ", " @ %this.getId() @ ");");
-		}
+		// callback(value, client, pref object);
+		// callbacks can now only be function names and always get called with the same value set
+		call(%this.callback, %value, %updaterClean, %this);
 	}
 }
 
@@ -216,19 +239,20 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 
 			if(%value < %this.minValue) {
 				%value = %this.minValue;
-			}	else if(%value > %this.maxValue){
+			}
+			else if(%value > %this.maxValue){
 				%value = %this.maxValue;
 			}
 
-		case "string" or "password":
+		case "string" or "password": // why is password a unique type rather than a property of the pref object? What if I have a number or datablock I want to keep secret?
 			if(strlen(%value) > %this.maxLength) {
 				%value = getSubStr(%value, 0, %this.maxLength);
 			}
 			if(%this.stripML) {
-				%value = stripMLControlChars(%value);
+				%value = stripMLControlChars(%value); // sure we couldn't have a MLString type?
 			}
 
-		case "slider":
+		case "float": // a slider is a float and is called "float" in every other pref system. I've changed it here as proposal.
 			if(%value < %this.minValue) {
 				%value = %this.minValue;
 			}
@@ -244,7 +268,10 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 
 			if(%value < 0)
 				%value = 0;
-
+		// which reminds me, you need datablocks.
+		// and wordlists.
+		// The reason you can't just do processing for datablocks on the client side is because the client will almost always just have a bunch of IDs and send those.
+		// If you change your addon selections, the IDs change. You've gotta find a way round that.
 	}
 	return %value;
 }
