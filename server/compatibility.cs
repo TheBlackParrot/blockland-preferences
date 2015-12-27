@@ -9,7 +9,7 @@ package BLPrefCompatibilityPackage {
 		%type = getWord(%params, 0);
 		// type checks moved to server.cs, considering them shorthand
 		// some prefs have "$", some don't
-		registerPref(%addon, %name, %type, "$" @ strReplace(%variable, "$", ""), %default, getWords(%params, 1), %callback, "bricks", 1);
+		registerPref(%addon, "General", %name, %type, "$" @ strReplace(%variable, "$", ""), %default, getWords(%params, 1), %callback, 1);
 
 		if(isFunction("RTB_registerPref"))
 			parent::RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback);

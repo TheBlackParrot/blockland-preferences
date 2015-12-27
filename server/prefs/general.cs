@@ -5,9 +5,9 @@ function registerServerSettingPrefs() {
 	registerPref(%cat, "General", "Server Name", "string", "$Pref::Server::Name", $Pref::Server::Name, "64 1", "updateServerSetting", 0);
 	registerPref(%cat, "General", "Welcome Message", "string", "$Pref::Server::WelcomeMessage", $Pref::Server::WelcomeMessage, "512 0", "updateServerSetting", 0);
 	registerPref(%cat, "General", "Maximum Players", "number", "$Pref::Server::MaxPlayers", $Pref::Server::MaxPlayers, "1 99 0", "updateServerSetting", 0);
-	registerPref(%cat, "Security", "Server Password", "password", "$Pref::Server::Password", $Pref::Server::Password, "512 0", "updateServerSetting", 0, 1);
-	registerPref(%cat, "Security", "Admin Password", "password", "$Pref::Server::AdminPassword", $Pref::Server::AdminPassword, "512 0", "updateServerSetting", 0, 1);
-	registerPref(%cat, "Security", "Super Admin Password", "password", "$Pref::Server::SuperAdminPassword", $Pref::Server::SuperAdminPassword, "512 0", "updateServerSetting", 0, 1);
+	registerPref(%cat, "Security", "Server Password", "string", "$Pref::Server::Password", $Pref::Server::Password, "512 0", "updateServerSetting", 0, 1);
+	registerPref(%cat, "Security", "Admin Password", "string", "$Pref::Server::AdminPassword", $Pref::Server::AdminPassword, "512 0", "updateServerSetting", 0, 1);
+	registerPref(%cat, "Security", "Super Admin Password", "string", "$Pref::Server::SuperAdminPassword", $Pref::Server::SuperAdminPassword, "512 0", "updateServerSetting", 0, 1);
 	registerPref(%cat, "Security", "Enable E-Tard Filter", "boolean", "$Pref::Server::ETardFilter", $Pref::Server::ETardFilter, "", "updateServerSetting", 0);
 	registerPref(%cat, "Security", "E-Tard List", "wordlist", "$Pref::Server::ETardList", $Pref::Server::ETardList, ", 51", "updateServerSetting", 0);
 	registerPref(%cat, "Security", "Who can change preferences?", "list", "$Pref::BLPrefs::AllowedRank", $Pref::BLPrefs::AllowedRank, "Host 3 Super_Admin 2 Admin 1", "updateBLPrefPermission", 0, 0, 1);

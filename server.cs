@@ -96,7 +96,7 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 	// - dropdown [item1Name] [item1Var] [item2Name] [item2Var] etc # 
 	// - string [charLimit] [stripML] #
 	
-	%valid = ":playercount:wordlist:datablocklist:userlist:datablock:slider:num:bool:button:list:string";
+	%valid = ":playercount:wordlist:datablocklist:userlist:datablock:slider:num:bool:button:dropdown:string";
 
 	if(stripos(%valid, ":" @ %type) == -1)
 	{
