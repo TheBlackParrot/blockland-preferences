@@ -45,7 +45,7 @@ function serverCmdGetBLPrefCategory(%client, %category) {
 //clientCmdAddPref(%addon, %title, %type, %variable, %value, %params, %icon)
 //commandToClient(%client, 'addPref', %row.category, %row.title, %row.type, %row.variable, eval("return" SPC %row.variable @ ";"), %row.params, %row.icon);
 
-function serverCmdupdateBLPref(%client, %varname, %newvalue) {
+function serverCmdupdateBLPref(%client, %varname, %newvalue, %announce) {
 	//validate!
 	if(!%client.BLP_isAllowedUse())
 		return;
@@ -65,7 +65,7 @@ function serverCmdupdateBLPref(%client, %varname, %newvalue) {
 			echo("\c4" @ %client.netname @ " set " @ %varname @ " to " @ %newvalue);
 		}
 
-		if($Pref::BLPrefs::AnnounceChanges) {
+		if(%announce) {
 			if(%pso.type $= "list" || %pso.type $= "datablock") {
 				%displayValue = %pso.valueName[%newvalue];
 			} else {
