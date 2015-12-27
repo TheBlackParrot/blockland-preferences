@@ -18,71 +18,86 @@ if(!isObject(PreferenceContainerGroup)) {
 }
 
 $Pref::BLPrefs::ServerDebug = true;
+%Pref::BLPrefs::iconDefault = "wrench";
 $BLPrefs::Version = "0.0-dev";
 
-exec("./functions.cs");
-exec("./compatibility.cs");
-exec("./handshake.cs");
-exec("./interaction.cs");
+exec("./support/admin.cs");
+exec("./support/lesseval.cs");
+
+exec("./server/functions.cs");
+exec("./server/compatibility.cs");
+exec("./server/handshake.cs");
+exec("./server/interaction.cs");
 
 if($Pref::PreLoadScriptLauncherVersion < 1) {
-	fileCopy("./preloader.cs", "config/main.cs");
+	fileCopy("./support/preloader.cs", "config/main.cs");
 }
 
-// Chrisbot6's todo list
-// - registerBlocklandPref should just be registerPref.
-// - values should be ordered differently
-// - %addon is ambiguous, rename to %category?
-// - %icon should allow the user to use icons from anywhere
-// - %type should probably contain all type info, not just a type name - is %perams needed? Not that I dislike it, but it would make legacy easier.
-// - %legacy shoudn't be needed
-// - List delimiters should be torque standard
-// - Do we need shorthand?
-// - Server_Prefs value types pls
-// - Merge the features of Server_Prefs into this
-// - %icon should be per category??
-
-// value types I want to add:
-// - RTB's playercount type
-// - My wordlist, datablocklist and userlist types
-// - RTB's datablock type
-// - event system's color/vector type (color/colour/vec can be shorthand?)
-// - or maybe we could use the colorset for color like slayer does? That would be interesting.
-// - your time type?
-
-function registerBlocklandPref(%addon, %title, %type, %variable, %default, %params, %callback, %icon, %legacy)
+function registerPref(%addon, %dev, %title, %type, %variable, %default, %params, %callback, %legacy, %isSecret, %isHostOnly)
 {
-	// using famfamfam's silk icons. use an icon filename minus the extension for %icon
-	// RTB prefs will use the old RTB icon by default
-
-	// the server will not need them, only the soon-to-be client(s) will
-	// if there's a way to send icons to clients without clients having it, by all means, please add that
-	
-	// suggestion from Chris: Server_Prefs has a "wrench" icon for prefs that shows if the client can't find the specified icon.
-	// use that same idea?
-
 	// %leagacy = 1 if it's added via a compatibility wrapper
 
+	if(%dev $= "") {
+		%dev = "General";
+	}
+	
 	// shorthand types
 	switch$(%type) {
-		case "bool" or "tf":
-			%type = "boolean";
+		case "boolean" or "tf":
+			%type = "bool";
 
-		case "num" or "int" or "float" or "real":
-			%type = "number";
+		case "number" or "real" or "intiger":
+			%type = "num";
+			
+		case "numplayers":
+			%type = "playercount";
 
 		case "str":
 			%type = "string";
 
-		case "slide" or "range":
+		case "slide" or "range" or "float":
 			%type = "slider";
 
-		case "choice" or "choices":
-			%type = "list";
+		case "choice" or "choices" or "list":
+			%type = "dropdown";
+			
+		case "delimited":
+			%type = "wordlist";
+			
+		case "users" or "bl_idlist" or "adminlist":
+			%type = "userlist";
+			
+		case "colour":
+			%type = "color";
+			
+		case "data":
+			%type = "datablock";
+			
+		case "datalist" or "delimiteddata":
+			%type = "datablocklist";
+		
+		case "vec":
+			%type = "vector";
+			
+		case "call" or "function" or "push" or "callbackButton":
+			%type = "button";
 	}
 
-	%valid = ":number:string:slider:boolean:list:password";
-	// possible future entries?: color (hex, rgb, set (via params)), time
+	// valid pref types:
+	// - playercount [min] [max] (RTB's convenience list type) #
+	// - wordlist [delim] [max]
+	// - datablocklist [type] [delim] [max]
+	// - userlist [delim] [max]
+	// - datablock [type] [hasNoneOption] #
+	// - slider [min] [max] [snapTo] [stepValue] #
+	// - num [min] [max] [decimalpoints] #
+	// - bool #
+	// - button #
+	// - dropdown [item1Name] [item1Var] [item2Name] [item2Var] etc # 
+	// - string [charLimit] [stripML] #
+	
+	%valid = ":playercount:wordlist:datablocklist:userlist:datablock:slider:num:bool:button:list:string";
+
 	if(stripos(%valid, ":" @ %type) == -1)
 	{
 		warn("Invalid pref type:" SPC %type);
@@ -96,7 +111,7 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 			title = BLP_alNum(%addon);
 			legacy = %legacy;
 			category = %addon;
-			icon = %icon;
+			icon = $Pref::BlPrefs::iconDefault;
 		};
 	} else {
 		%group = (%groupName).getID();
@@ -119,16 +134,17 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 		type = %type;
 		callback = %callback;
 		params = %params;
-		icon = %icon;
 		legacy = %legacy;
-		announce = true;
+		devision = %dev;
+		secret = %isSecret;
+		hostOnly = %isHostOnly;
 	};
 	%group.add(%pref);
 
 	// use this for server-sided validation?
 	switch$(%type)
 	{
-		case "number":
+		case "num":
 			%pref.minValue = getWord(%params, 0);
 			%pref.maxValue = getWord(%params, 1);
 			%pref.decimalPoints = getWord(%params, 2);
@@ -141,8 +157,23 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 			{
 				%pref.defaultValue = %pref.maxValue;
 			}
+			
+		case "playercount":
+			%pref.minValue = getWord(%params, 0);
+			%pref.maxValue = getWord(%params, 1);
 
-		case "string" or "password":
+			if(%pref.defaultValue < %pref.minValue)
+			{
+				%pref.defaultValue = %pref.minValue;
+			}
+			else if(%pref.defaultValue > %pref.maxValue)
+			{
+				%pref.defaultValue = %pref.maxValue;
+			}
+			
+			%pref.defaultValue = mFloor(%pref.defaultValue);
+
+		case "string":
 			%pref.maxLength = getWord(%params, 0);
 			%pref.stripML = getWord(%params, 1);
 
@@ -166,40 +197,150 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 				%pref.defaultValue = %pref.maxValue;
 			}
 
-		case "boolean":
+		case "bool":
 			if(%pref.defaultValue > 1)
 				%pref.defaultValue = 1;
 
 			if(%pref.defaultValue < 0)
 				%pref.defaultValue = 0;
 
-		case "list":
-			// TS needs an explode function ffs
-			%count = 0;
-			while(strLen(%params)) {
-				%pos = stripos(%params, "|");
-				%row = getSubStr(%params, 0, %pos);
-
-				%pref.rowName[%count] = getSubStr(%row, 0, stripos(%row, "**"));
-				%pref.rowValue[%count] = getSubStr(%row, stripos(%row, "**")+2, strLen(%row));
+		case "dropdown":
+			// using the ol rtb list format
+			%count = getWordCount(%params) / 2;
+		
+			for(%i = 0; %i < %count; %i++) {
+				%first = (%i * 2);
+				
+				%pref.rowName[%count] = strreplace(getWord(%type, %first), "_", " ");
+				%pref.rowValue[%count] = getWord(%type, %first+1);
+				
 				%pref.valueName[%pref.rowValue[%count]] = %pref.rowName[%count];
-
-				%count++;
-
-				if(stripos(%params, "|") != -1) {
-					%params = getSubStr(%params, stripos(%params, "|")+1, strLen(%params));
-				} else {
-					%params = "";
+			}
+			
+			%pref.listCount = %count;
+			
+		case "datablock":
+			%pref.dataType = getWord(%params, 0);
+			%pref.canBeNone = getWord(%params, 1);
+			
+			if(!isObject(%pref.defaultValue)) {
+				%pref.defaultValue = -1;
+				%pref.canBeNone = true;
+			}
+			else {
+				if((%pref.defaultValue).getClassName() != %pref.dataType) {
+					%pref.defaultValue = -1;
+					%pref.canBeNone = true; // actually make it the first possible datablock in future rather than forcing "NONE" option and setting it
 				}
 			}
-			%pref.listCount = %count;
-			// "Host**4|Super Admin**3|Admin**2|All**1"
+			
+			// populate the pref object with all possible data values
+			// IMPORTANT: when setting the actual global, MAKE SURE YOU USE THE DATABLOCK NAME. In all other situations, use its ID.
+			%count = 0;
+			
+			if(%pref.canBeNone) {
+				// add "NONE" option
+				%pref.rowName[%count] = "NONE";
+				%pref.rowValue[%count] = -1;
+				
+				%count++;
+			}
 
-			// "**" denotes the separation of the visible part and the value of the variable
-			// "|" denotes a new choice
+			for(%i = 0; %i < DataBlockGroup.getCount(); %i++) {
+				%data = DataBlockGroup.getObject(%i);
+				
+				if(%data.getClassName() != %pref.dataType)
+					continue;
+				
+				%pref.rowName[%count] = %data.uiName !$= "" ? %data.uiName : %data.getName();
+				%pref.rowValue[%count] = %data.getId();
+				
+				%pref.valueName[%pref.rowValue[%count]] = %pref.rowName[%count];
+				
+				%count++;
+			}
+			
+		case "wordlist":
+			%pref.delimiter = strreplace(getWord(%perams, 0), "_", " ");
+			%pref.maxWords = getWord(%perams, 1);
+			
+			%prefsAsFields = strreplace(%pref.defaultValue, %pref.delimiter, "" TAB ""); // hacky but it works
+			
+			// amend?
+			if(getFieldCount(%prefsAsFields) > %pref.maxWords && %pref.maxWords != -1) {
+				%prefsAsFields = getFields(%pref.defaultValue, %pref.maxWords);
+			}
+			
+			%pref.defaultValue = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
+			
+		case "userlist":
+			%pref.delimiter = strreplace(getWord(%perams, 0), "_", " ");
+			%pref.maxWords = getWord(%perams, 1);
+			
+			%prefsAsFields = strreplace(%pref.defaultValue, %pref.delimiter, "" TAB ""); // hacky but it works
+			
+			// amend?
+			if(getFieldCount(%prefsAsFields) > %pref.maxWords && %pref.maxWords != -1) {
+				%prefsAsFields = getFields(%pref.defaultValue, %pref.maxWords);
+			}
+			
+			// make sure EVERY field is a valid number.
+			for(%i = 0; %i < getFieldCount(%prefsAsFields); %i++) {
+				%prefsAsFields = setField(%prefsAsFields, %i, mFloor(getField(%prefsAsFields, %i)));
+			}
+			
+			%pref.defaultValue = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
+			
+		case "datablocklist":
+			%pref.dataType = getWord(%perams, 0);
+			%pref.delimiter = strreplace(getWord(%perams, 1), "_", " ");
+			%pref.maxWords = getWord(%perams, 2);
+			
+			%prefsAsFields = strreplace(%pref.defaultValue, %pref.delimiter, "" TAB ""); // hacky but it works
+			
+			// amend?
+			if(getFieldCount(%prefsAsFields) > %pref.maxWords && %pref.maxWords != -1) {
+				%prefsAsFields = getFields(%pref.defaultValue, %pref.maxWords);
+			}
+			
+			// make sure EVERY field is a valid datablock.
+			for(%i = 0; %i < getFieldCount(%prefsAsFields); %i++) {
+				%data = getField(%prefsAsFields, %i);
+				
+				%validated = false;
+				
+				if(isObject(%data)) {
+					if((%data).getClassName() == %pref.dataType) {
+						%validated = true;
+					}
+				}
+				
+				if(!%validated) {
+					%prefsAsFields = setField(%prefsAsFields, %i, -1);
+				}
+			}
+			
+			%pref.defaultValue = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
 	}
 
 	return %pref;
+}
+
+function registerPrefGroupIcon(%addon, %icon) {
+	%groupName = BLP_alNum(%addon) @ "Prefs";
+	if(!isObject(%groupName)) {
+		%group = new ScriptGroup(BlocklandPrefGroup) {
+			class = "PreferenceGroup";
+			title = BLP_alNum(%addon);
+			legacy = %legacy;
+			category = %addon;
+			icon = $Pref::BlPrefs::iconDefault;
+		};
+	} else {
+		%group = (%groupName).getID();
+	}
+	
+	%group.icon = %icon; // change icon with this function, so they're per category only now
 }
 
 function BlocklandPrefSO::onAdd(%obj)
@@ -220,18 +361,12 @@ function BlocklandPrefSO::updateValue(%this, %value, %updater) {
 		%updaterClean = 0;
 	}
 
-	setGlobalByName(%this.variable, %value); //eval(%this.variable @ " = \"" @ expandEscape(%value) @ "\";");
-
-	// the code below bothers me.
-	// 1. Why let people put in full expressions for their callbacks? This isn't what a callback is. A callback should have a standardized format and should find what it needs when it runs.
-	//    You're giving the user the same pointless burden of responsibility as guiCtrl commands do. Just assume the callback's a function name in a string and nothing more.
-	// 2. Why are you using eval here? Just use call(functionName, [args]..), it's a lot easier and you don't have to compile or expand escapes.
-	// 3. You don't need to use getID to pass an object to a function. An object reference is essentially an object id, and vice versa. Try putting "hammerItem" in a string and calling .getName()
-	//    or .getId();. Torque looks for them.
-	
-	// I've made a change suggestion here but I'm not sure what you'll think.
-	
-	// - Chrisbot6
+	// when storing datablocks, use their NAME.
+	if(%this.type == "datablock")
+		setGlobalByName(%this.variable, (%value).getName());
+	else {
+		setGlobalByName(%this.variable, %value);
+	}
 	
 	if(%this.callback !$= "") {
 		// callback(value, client, pref object);
@@ -243,7 +378,7 @@ function BlocklandPrefSO::updateValue(%this, %value, %updater) {
 function BlocklandPrefSO::validateValue(%this, %value) {
 	// this is where the SO's come in handy
 	switch$(%this.type) {
-		case "number":
+		case "num":
 			if(%this.decimalPoints !$= "") {
 				%value = mFloatLength(%value, %this.decimalPoints);
 			}
@@ -255,7 +390,7 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 				%value = %this.maxValue;
 			}
 
-		case "string" or "password": // why is password a unique type rather than a property of the pref object? What if I have a number or datablock I want to keep secret?
+		case "string":
 			if(strlen(%value) > %this.maxLength) {
 				%value = getSubStr(%value, 0, %this.maxLength);
 			}
@@ -263,7 +398,7 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 				%value = stripMLControlChars(%value); // sure we couldn't have a MLString type?
 			}
 
-		case "float": // a slider is a float and is called "float" in every other pref system. I've changed it here as proposal.
+		case "slider":
 			if(%value < %this.minValue) {
 				%value = %this.minValue;
 			}
@@ -273,12 +408,74 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 
 			%value -= (%value % %this.snapTo);
 
-		case "boolean":
+		case "bool":
 			if(%value > 1)
 				%value = 1;
 
 			if(%value < 0)
 				%value = 0;
+			
+		case "dropdown":
+			if(%pref.valueName[%value] $= "") {
+				%value = %pref.rowValue[0]; // hacky, but it should work
+			}
+			
+		case "datablock":
+			if(%pref.valueName[%value] $= "") {
+				%value = %pref.rowValue[0];
+			}
+			
+		case "wordlist":
+			%prefsAsFields = strreplace(%value, %pref.delimiter, "" TAB ""); // hacky but it works
+			
+			// amend?
+			if(getFieldCount(%prefsAsFields) > %pref.maxWords) {
+				%prefsAsFields = getFields(%value, %pref.maxWords);
+			}
+			
+			%value = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
+			
+		case "userlist":
+			%prefsAsFields = strreplace(%pref.defaultValue, %pref.delimiter, "" TAB "");
+			
+			// amend?
+			if(getFieldCount(%prefsAsFields) > %pref.maxWords) {
+				%prefsAsFields = getFields(%value, %pref.maxWords);
+			}
+			
+			// make sure EVERY field is a valid number.
+			for(%i = 0; %i < getFieldCount(%prefsAsFields); %i++) {
+				%prefsAsFields = setField(%prefsAsFields, %i, mFloor(getField(%prefsAsFields, %i)));
+			}
+			
+			%value = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
+			
+		case "datablocklist":
+			%prefsAsFields = strreplace(%value, %pref.delimiter, "" TAB "");
+			
+			// amend?
+			if(getFieldCount(%prefsAsFields) > %pref.maxWords) {
+				%prefsAsFields = getFields(%value, %pref.maxWords);
+			}
+			
+			// make sure EVERY field is a valid datablock.
+			for(%i = 0; %i < getFieldCount(%prefsAsFields); %i++) {
+				%data = getField(%prefsAsFields, %i);
+				
+				%validated = false;
+				
+				if(isObject(%data)) {
+					if((%data).getClassName() == %pref.dataType) {
+						%validated = true;
+					}
+				}
+				
+				if(!%validated) {
+					%prefsAsFields = setField(%prefsAsFields, %i, -1);
+				}
+			}
+			
+			%value = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
 	}
 	return %value;
 }
@@ -302,11 +499,16 @@ function BlocklandPrefGroup::onAdd(%this) {
 	PreferenceContainerGroup.add(%this);
 }
 
-// add a wrapper to execute everything in the prefs folder
+// a wrapper to execute everything in the prefs folder
 // will be used for older addons without prefs, if asked for them
 if(!$BLPrefs::AddedServerSettings) {
-	exec("./prefs/general.cs");
-	exec("./prefs/blprefs.cs");
+	%file = findFirstFile("./server/prefs/*.cs");
+    
+    while(%file !$= "")
+	{
+        exec(%file);
+	    %file = findNextFile("./server/prefs/*.cs");
+	}
 }
 
 $BLPrefs::Init = true;

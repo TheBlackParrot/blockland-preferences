@@ -14,8 +14,8 @@ package BLPrefServerPackage {
 	}
 
 	function GameConnection::autoAdminCheck(%client) {
-		%admin = parent::autoAdminCheck(%client);
-		commandToClient(%client, 'hasPrefSystem', $BLPrefs::Version, %admin); //let them know if they have permission to use it; assume that admin is permission for now?
+		%admin = %client.BLP_isAllowedUse();
+		commandToClient(%client, 'hasPrefSystem', $BLPrefs::Version, %admin);
 		return %admin;
 	}
 

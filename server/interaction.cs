@@ -47,10 +47,17 @@ function serverCmdGetBLPrefCategory(%client, %category) {
 
 function serverCmdupdateBLPref(%client, %varname, %newvalue) {
 	//validate!
+	if(!%client.BLP_isAllowedUse())
+		return;
 
 	//we need to find the object
 	%pso = BlocklandPrefSO::findByVariable(%varname);
 	if(%pso) {
+		if(%pso.hostOnly) {
+			if(%client.bl_id != getNumKeyId())
+				return;
+		}
+		
 		%newvalue = %pso.validateValue(%newvalue);
 		%pso.updateValue(%newvalue, %client);
 
@@ -58,13 +65,17 @@ function serverCmdupdateBLPref(%client, %varname, %newvalue) {
 			echo("\c4" @ %client.netname @ " set " @ %varname @ " to " @ %newvalue);
 		}
 
-		if($Pref::BLPrefs::AnnounceChanges && %pso.announce && %pso.type !$= "password") {
-			if(%pso.type $= "list") {
+		if($Pref::BLPrefs::AnnounceChanges) {
+			if(%pso.type $= "list" || %pso.type $= "datablock") {
 				%displayValue = %pso.valueName[%newvalue];
 			} else {
 				%displayValue = expandEscape(%newvalue);
 			}
-			messageAll('MsgAdminForce', "\c6 + \c3" @ %client.netname SPC "\c6set\c3" SPC %pso.title SPC "\c6to\c3" SPC %displayValue);
+			
+			if(!%pso.isSecret)
+				messageAll('MsgAdminForce', "\c6 + \c3" @ %client.netname SPC "\c6set\c3" SPC %pso.title SPC "\c6to\c3" SPC %displayValue);
+			else
+				messageAll('MsgAdminForce', "\c6 + \c3" @ %client.netname SPC "\c6set\c3" SPC %pso.title);
 		}
 
 		for(%i = 0; %i < ClientGroup.getCount(); %i++) {

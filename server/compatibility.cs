@@ -1,11 +1,15 @@
-$RTB::RTBR_ServerControl_Hook = true;
+$RTB::RTBR_ServerControl_Hook = true; // RTB is totally on guys
+
+// Server_Prefs hooks too
+$RTB::Hooks::ServerControl = true; // RTB is totally on guys
+$ORBS::Hooks::ServerControl = true; // yup oRBs too
 
 package BLPrefCompatibilityPackage {
 	function RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback) {
 		%type = getWord(%params, 0);
 		// type checks moved to server.cs, considering them shorthand
 		// some prefs have "$", some don't
-		registerBlocklandPref(%addon, %name, %type, "$" @ strReplace(%variable, "$", ""), %default, getWords(%params, 1), %callback, "bricks", 1);
+		registerPref(%addon, %name, %type, "$" @ strReplace(%variable, "$", ""), %default, getWords(%params, 1), %callback, "bricks", 1);
 
 		if(isFunction("RTB_registerPref"))
 			parent::RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback);
