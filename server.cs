@@ -2,6 +2,7 @@
 // -- Contributors:
 //    -- TheBlackParrot (BL_ID 18701)
 //    -- Jincux (BL_ID 9789)
+// 	  -- Chrisbot6 (BL_ID 12233)
 
 if($BLPrefs::didPreload && !$BLPrefs::Debug) {
 	echo("Preferences already preloaded, nothing to do here.");
@@ -28,19 +29,26 @@ if($Pref::PreLoadScriptLauncherVersion < 1) {
 	fileCopy("./preloader.cs", "config/main.cs");
 }
 
-// Chrisbot6's big list of complaints about your pref format:
-// - %perams is a terrible idea and people will have a thousand different formats for that variable. Decide what you actually want from your system.
+// Chrisbot6's todo list
 // - registerBlocklandPref should just be registerPref.
-// - Your values should be most important first, not jumbled up like this.
-// - %addon is ambiguous. Do you want a folder name or what? %category would be better.
-// - %icon should allow the user to use icons from anywhere, not just your little list. What are you, Microsoft?
-// - %type is more than one word is every pref format except yours. Where am I supposed to pass in how a type is handled? %perams? If so, where do I put subcategories? You're not thinking at all about
-//   how things will look on the other end.
-// - %legacy shoudn't be needed and only proves your pref format is near impossible to convert to due to how different you've made it.
-// - Stop using nonstandard list delimiters because "it's easier for users". Torque is MORE THAN based around words and fields.
-// - You don't need shorthand. It just confuses things more. If someone registers with an invalid type, just show them an error or a string box and move on.
-// - Do not overstandardize values. You're limiting yourselves and your users. It's perfectly acceptable to have types for specific purposes, such as RTB's playerlist and datablock, and
-//   my wordlist and bl_idlist.
+// - values should be ordered differently
+// - %addon is ambiguous, rename to %category?
+// - %icon should allow the user to use icons from anywhere
+// - %type should probably contain all type info, not just a type name - is %perams needed? Not that I dislike it, but it would make legacy easier.
+// - %legacy shoudn't be needed
+// - List delimiters should be torque standard
+// - Do we need shorthand?
+// - Server_Prefs value types pls
+// - Merge the features of Server_Prefs into this
+// - %icon should be per category??
+
+// value types I want to add:
+// - RTB's playercount type
+// - My wordlist, datablocklist and userlist types
+// - RTB's datablock type
+// - event system's color/vector type (color/colour/vec can be shorthand?)
+// - or maybe we could use the colorset for color like slayer does? That would be interesting.
+// - your time type?
 
 function registerBlocklandPref(%addon, %title, %type, %variable, %default, %params, %callback, %icon, %legacy)
 {
@@ -49,6 +57,9 @@ function registerBlocklandPref(%addon, %title, %type, %variable, %default, %para
 
 	// the server will not need them, only the soon-to-be client(s) will
 	// if there's a way to send icons to clients without clients having it, by all means, please add that
+	
+	// suggestion from Chris: Server_Prefs has a "wrench" icon for prefs that shows if the client can't find the specified icon.
+	// use that same idea?
 
 	// %leagacy = 1 if it's added via a compatibility wrapper
 
@@ -218,7 +229,7 @@ function BlocklandPrefSO::updateValue(%this, %value, %updater) {
 	// 3. You don't need to use getID to pass an object to a function. An object reference is essentially an object id, and vice versa. Try putting "hammerItem" in a string and calling .getName()
 	//    or .getId();. Torque looks for them.
 	
-	// I've made a change suggestion here but I'm not sure what you'll think. Take or leave.
+	// I've made a change suggestion here but I'm not sure what you'll think.
 	
 	// - Chrisbot6
 	
@@ -268,10 +279,6 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 
 			if(%value < 0)
 				%value = 0;
-		// which reminds me, you need datablocks.
-		// and wordlists.
-		// The reason you can't just do processing for datablocks on the client side is because the client will almost always just have a bunch of IDs and send those.
-		// If you change your addon selections, the IDs change. You've gotta find a way round that.
 	}
 	return %value;
 }
