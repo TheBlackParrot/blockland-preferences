@@ -25,6 +25,7 @@ package BLPrefServerPackage {
 		if($Server::Dedicated) {
 			activatePackage(BLPrefServerPackage);
 			activatePackage(BLPrefCompatibilityPackage);
+			activatePackage(BLPrefBL_IDPackage);
 		}
 	}
 };

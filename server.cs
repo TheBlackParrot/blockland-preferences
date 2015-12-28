@@ -28,6 +28,7 @@ exec("./server/functions.cs");
 exec("./server/compatibility.cs");
 exec("./server/handshake.cs");
 exec("./server/interaction.cs");
+exec("./server/userdata.cs");
 
 if($Pref::PreLoadScriptLauncherVersion < 1) {
 	fileCopy("./support/preloader.cs", "config/main.cs");
