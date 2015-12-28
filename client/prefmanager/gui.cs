@@ -514,6 +514,14 @@ function newSettingsGui::selectOption(%this) {
 function newSettingsGui::settingChanged(%this, %serverId, %newValue) {
 	%changes = getFieldCount(%this.changeList);
 	
+	%pr = findPref(%serverId);
+	
+	if(getWord(%pr.type, 0) $= "dropdown" || getWord(%pr.type, 0) $= "datablock" || getWord(%pr.type, 0) $= "playercount") {
+		// hotfix inbound
+		if(%pr.value == %newValue)
+			return;
+	}
+	
 	for(%i = 0; %i < %changes; %i++) {
 		// if the value is already in the change list, don't add a new one
 		%id = getWord(getField(%this.changeList, %i), 0);

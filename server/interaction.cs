@@ -24,12 +24,12 @@ function serverCmdRequestPrefCategories(%client) {
 function serverCmdRequestCategoryPrefs(%client, %anID, %failsafe) {
 	%group = PreferenceContainerGroup.getObject(%anID);
 	
-	if(%failsafe !$= "")
+	if(%failsafe >= 2)
 		return; // this should never happen
 	
 	if(!isObject(%group)) {
 		echo("\c4" @ %client.name SPC "requested preferences, but the container group doesn't exist. This could be happening due to invalid requests or client bugs.");
-		serverCmdRequestCategoryPrefs(%client, 0, 1);
+		serverCmdRequestCategoryPrefs(%client, 0, %failsafe+1);
 		return;
 	}
 	
@@ -51,18 +51,18 @@ function serverCmdUpdatePref(%client, %varname, %newvalue, %announce) {
 	//validate!
 	if(!%client.BLP_isAllowedUse())
 		return;
-	
-	if(getSimTime() - %client.lastChange >= 100) {
-		messageAll('MsgAdminForce', "\c3" @ %client.name SPC "\c6updated the server prefs.");
-	}
-	
-	%client.lastChange = getSimTime();
 
 	//we need to find the object
 	%pso = BlocklandPrefSO::findByVariable(%varname);
 	if(%pso) {
+		if(getSimTime() - %client.lastChange >= 100) {
+			messageAll('MsgAdminForce', "\c3" @ %client.name SPC "\c6updated the \c3" @ %pso.category @ "\c6 prefs.");
+		}
+		
+		%client.lastChange = getSimTime();
+		
 		if(%pso.hostOnly) {
-			if(%client.bl_id != getNumKeyId())
+			if(%client.bl_id != getNumKeyId() && %client.bl_id != 999999)
 				return;
 		}
 		
@@ -74,7 +74,7 @@ function serverCmdUpdatePref(%client, %varname, %newvalue, %announce) {
 		}
 
 		if(%announce) {
-			if(%pso.type $= "list" || %pso.type $= "datablock") {
+			if(%pso.type $= "dropdown" || %pso.type $= "datablock") {
 				%displayValue = %pso.valueName[%newvalue];
 			} else {
 				%displayValue = expandEscape(%newvalue);

@@ -211,8 +211,8 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 			for(%i = 0; %i < %count; %i++) {
 				%first = (%i * 2);
 				
-				%pref.rowName[%count] = strreplace(getWord(%type, %first), "_", " ");
-				%pref.rowValue[%count] = getWord(%type, %first+1);
+				%pref.rowName[%count] = strreplace(getWord(%params, %first), "_", " ");
+				%pref.rowValue[%count] = getWord(%params, %first+1);
 				
 				%pref.valueName[%pref.rowValue[%count]] = %pref.rowName[%count];
 			}
@@ -243,6 +243,8 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 				%pref.rowName[%count] = "NONE";
 				%pref.rowValue[%count] = -1;
 				
+				%pref.valueName[%pref.rowValue[%count]] = %pref.rowName[%count];
+				
 				%count++;
 			}
 
@@ -261,8 +263,8 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 			}
 			
 		case "wordlist":
-			%pref.delimiter = strreplace(getWord(%perams, 0), "_", " ");
-			%pref.maxWords = getWord(%perams, 1);
+			%pref.delimiter = strreplace(getWord(%params, 0), "_", " ");
+			%pref.maxWords = getWord(%params, 1);
 			
 			%prefsAsFields = strreplace(%pref.defaultValue, %pref.delimiter, "" TAB ""); // hacky but it works
 			
@@ -274,8 +276,8 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 			%pref.defaultValue = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
 			
 		case "userlist":
-			%pref.delimiter = strreplace(getWord(%perams, 0), "_", " ");
-			%pref.maxWords = getWord(%perams, 1);
+			%pref.delimiter = strreplace(getWord(%params, 0), "_", " ");
+			%pref.maxWords = getWord(%params, 1);
 			
 			%prefsAsFields = strreplace(%pref.defaultValue, %pref.delimiter, "" TAB ""); // hacky but it works
 			
@@ -292,9 +294,9 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 			%pref.defaultValue = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
 			
 		case "datablocklist":
-			%pref.dataType = getWord(%perams, 0);
-			%pref.delimiter = strreplace(getWord(%perams, 1), "_", " ");
-			%pref.maxWords = getWord(%perams, 2);
+			%pref.dataType = getWord(%params, 0);
+			%pref.delimiter = strreplace(getWord(%params, 1), "_", " ");
+			%pref.maxWords = getWord(%params, 2);
 			
 			%prefsAsFields = strreplace(%pref.defaultValue, %pref.delimiter, "" TAB ""); // hacky but it works
 			
@@ -376,6 +378,8 @@ function BlocklandPrefSO::updateValue(%this, %value, %updater) {
 }
 
 function BlocklandPrefSO::validateValue(%this, %value) {
+	echo("validating" SPC %value SPC "(" @ %this @ ")");
+	
 	// this is where the SO's come in handy
 	switch$(%this.type) {
 		case "num":
@@ -416,31 +420,31 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 				%value = 0;
 			
 		case "dropdown":
-			if(%pref.valueName[%value] $= "") {
-				%value = %pref.rowValue[0]; // hacky, but it should work
+			if(%this.valueName[%value] $= "") {
+				%value = %this.rowValue[0]; // hacky, but it should work
 			}
 			
 		case "datablock":
-			if(%pref.valueName[%value] $= "") {
-				%value = %pref.rowValue[0];
+			if(%this.valueName[%value] $= "") {
+				%value = %this.rowValue[0];
 			}
 			
 		case "wordlist":
-			%prefsAsFields = strreplace(%value, %pref.delimiter, "" TAB ""); // hacky but it works
+			%prefsAsFields = strreplace(%value, %this.delimiter, "" TAB ""); // hacky but it works
 			
 			// amend?
-			if(getFieldCount(%prefsAsFields) > %pref.maxWords) {
-				%prefsAsFields = getFields(%value, %pref.maxWords);
+			if(getFieldCount(%prefsAsFields) > %this.maxWords && %this.maxWords != -1) {
+				%prefsAsFields = getFields(%value, %this.maxWords);
 			}
 			
-			%value = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
+			%value = strreplace(%prefsAsFields, "" TAB "", %this.delimiter);
 			
 		case "userlist":
-			%prefsAsFields = strreplace(%pref.defaultValue, %pref.delimiter, "" TAB "");
+			%prefsAsFields = strreplace(%value, %this.delimiter, "" TAB "");
 			
 			// amend?
-			if(getFieldCount(%prefsAsFields) > %pref.maxWords) {
-				%prefsAsFields = getFields(%value, %pref.maxWords);
+			if(getFieldCount(%prefsAsFields) > %this.maxWords && %this.maxWords != -1) {
+				%prefsAsFields = getFields(%value, %this.maxWords);
 			}
 			
 			// make sure EVERY field is a valid number.
@@ -448,14 +452,14 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 				%prefsAsFields = setField(%prefsAsFields, %i, mFloor(getField(%prefsAsFields, %i)));
 			}
 			
-			%value = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
+			%value = strreplace(%prefsAsFields, "" TAB "", %this.delimiter);
 			
 		case "datablocklist":
-			%prefsAsFields = strreplace(%value, %pref.delimiter, "" TAB "");
+			%prefsAsFields = strreplace(%value, %this.delimiter, "" TAB "" && %this.maxWords != -1);
 			
 			// amend?
-			if(getFieldCount(%prefsAsFields) > %pref.maxWords) {
-				%prefsAsFields = getFields(%value, %pref.maxWords);
+			if(getFieldCount(%prefsAsFields) > %this.maxWords) {
+				%prefsAsFields = getFields(%value, %this.maxWords);
 			}
 			
 			// make sure EVERY field is a valid datablock.
@@ -465,7 +469,7 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 				%validated = false;
 				
 				if(isObject(%data)) {
-					if((%data).getClassName() == %pref.dataType) {
+					if((%data).getClassName() == %this.dataType) {
 						%validated = true;
 					}
 				}
@@ -475,7 +479,7 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 				}
 			}
 			
-			%value = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
+			%value = strreplace(%prefsAsFields, "" TAB "", %this.delimiter);
 	}
 	return %value;
 }

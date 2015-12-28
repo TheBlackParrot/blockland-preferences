@@ -9,8 +9,7 @@ function clientCmdReceivePref(%catId, %id, %name, %subcategory, %type, %params, 
 	%data = new ScriptObject()
 	{
 		// IMPORTANT
-		catId = %catId;
-		serverId = %id;
+		serverId = (100*%catId) + %id;
 		name = %name;
 		type = %type SPC %params; // hack to make my old system cooperate with our changes
 		
