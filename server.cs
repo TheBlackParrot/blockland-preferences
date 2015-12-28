@@ -47,7 +47,7 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 		case "boolean" or "tf":
 			%type = "bool";
 
-		case "number" or "real" or "intiger":
+		case "number" or "real" or "intiger" or "int":
 			%type = "num";
 			
 		case "numplayers":
