@@ -97,7 +97,7 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 	// - dropdown [item1Name] [item1Var] [item2Name] [item2Var] etc #
 	// - string [charLimit] [stripML] #
 	// - colorset #
-	// - rgb #
+	// - rgb [form] # form = hex, integer
 
 	%valid = ":playercount:wordlist:datablocklist:userlist:datablock:slider:num:bool:button:dropdown:string:rgb:colorset";
 
@@ -119,6 +119,9 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 	} else {
 		%group = (%groupName).getID();
 	}
+
+	if(%legacy)
+		%group.icon = "bricks";
 
 	for(%i=0;%i<%group.getCount();%i++) {
 		if(%variable $= %group.getObject(%i).variable) {
