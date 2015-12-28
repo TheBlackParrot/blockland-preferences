@@ -1,0 +1,198 @@
+// for my own sanity
+if($ZZZ::GuiLoaded !$= "") {
+	return;
+}
+
+$ZZZ::GuiLoaded = true;
+
+//--- OBJECT WRITE BEGIN ---
+new GuiControl(NewSettingsGui) {
+   profile = "GuiDefaultProfile";
+   horizSizing = "right";
+   vertSizing = "bottom";
+   position = "0 0";
+   extent = "1024 768";
+   minExtent = "8 2";
+   enabled = "1";
+   visible = "1";
+   clipToParent = "1";
+      catListPos = "1";
+      guiPosition = "0";
+      catPosition = "0";
+      fontSize = "43";
+      isLocal = "1";
+
+   new GuiWindowCtrl() {
+      profile = "GuiWindowProfile";
+      horizSizing = "center";
+      vertSizing = "center";
+      position = "181 162";
+      extent = "661 443";
+      minExtent = "8 2";
+      enabled = "1";
+      visible = "1";
+      clipToParent = "1";
+      text = "Server Prefs";
+      maxLength = "255";
+      resizeWidth = "0";
+      resizeHeight = "0";
+      canMove = "1";
+      canClose = "1";
+      canMinimize = "0";
+      canMaximize = "0";
+      minSize = "50 50";
+      closeCommand = "newSettingsGui.clickBack();";
+
+      new GuiScrollCtrl() {
+         profile = "GuiScrollProfile";
+         horizSizing = "relative";
+         vertSizing = "relative";
+         position = "10 36";
+         extent = "164 384";
+         minExtent = "8 2";
+         enabled = "1";
+         visible = "1";
+         clipToParent = "1";
+         willFirstRespond = "0";
+         hScrollBar = "alwaysOff";
+         vScrollBar = "alwaysOn";
+         constantThumbHeight = "0";
+         childMargin = "0 0";
+         rowHeight = "40";
+         columnWidth = "30";
+
+         new GuiTextListCtrl(NewSettingsGui_Categories) {
+            profile = "GuiTextListProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "1 1";
+            extent = "146 2";
+            minExtent = "8 2";
+            enabled = "1";
+            visible = "1";
+            clipToParent = "1";
+            command = "NewSettingsGui.selectOption();";
+            enumerate = "0";
+            resizeCell = "1";
+            columns = "0";
+            fitParentWidth = "1";
+            clipColumnText = "0";
+         };
+      };
+      new GuiScrollCtrl() {
+         profile = "GuiScrollProfile";
+         horizSizing = "relative";
+         vertSizing = "relative";
+         position = "182 36";
+         extent = "469 344";
+         minExtent = "8 2";
+         enabled = "1";
+         visible = "1";
+         clipToParent = "1";
+         willFirstRespond = "0";
+         hScrollBar = "alwaysOff";
+         vScrollBar = "alwaysOn";
+         constantThumbHeight = "0";
+         childMargin = "0 0";
+         rowHeight = "40";
+         columnWidth = "30";
+
+         new GuiSwatchCtrl(NewSettingsGui_Prefs) {
+            profile = "GuiDefaultProfile";
+            horizSizing = "relative";
+            vertSizing = "bottom";
+            position = "0 1";
+            extent = "469 64";
+            minExtent = "8 2";
+            enabled = "1";
+            visible = "1";
+            clipToParent = "1";
+            color = "0 122 96 1";
+               NTNameCount = "0";
+         };
+      };
+      new GuiBitmapButtonCtrl() {
+         profile = "BlockButtonProfile";
+         horizSizing = "relative";
+         vertSizing = "top";
+         position = "547 392";
+         extent = "104 29";
+         minExtent = "8 2";
+         enabled = "1";
+         visible = "1";
+         clipToParent = "1";
+         command = "newSettingsGui.clickDone();";
+         text = "Done";
+         groupNum = "-1";
+         buttonType = "PushButton";
+         bitmap = "base/client/ui/button1";
+         lockAspectRatio = "0";
+         alignLeft = "0";
+         alignTop = "0";
+         overflowImage = "0";
+         mKeepCached = "0";
+         mColor = "255 255 255 255";
+      };
+      new GuiBitmapButtonCtrl() {
+         profile = "BlockButtonProfile";
+         horizSizing = "relative";
+         vertSizing = "top";
+         position = "431 392";
+         extent = "104 29";
+         minExtent = "8 2";
+         enabled = "1";
+         visible = "1";
+         clipToParent = "1";
+         command = "newSettingsGui.clickApply();";
+         text = "Apply";
+         groupNum = "-1";
+         buttonType = "PushButton";
+         bitmap = "base/client/ui/button1";
+         lockAspectRatio = "0";
+         alignLeft = "0";
+         alignTop = "0";
+         overflowImage = "0";
+         mKeepCached = "0";
+         mColor = "255 255 255 255";
+      };
+      new GuiBitmapButtonCtrl() {
+         profile = "BlockButtonProfile";
+         horizSizing = "relative";
+         vertSizing = "top";
+         position = "182 392";
+         extent = "96 28";
+         minExtent = "8 2";
+         enabled = "1";
+         visible = "1";
+         clipToParent = "1";
+         command = "newSettingsGui.clickBack();";
+         accelerator = "escape";
+         text = "Close";
+         groupNum = "-1";
+         buttonType = "PushButton";
+         bitmap = "base/client/ui/button1";
+         lockAspectRatio = "0";
+         alignLeft = "0";
+         alignTop = "0";
+         overflowImage = "0";
+         mKeepCached = "0";
+         mColor = "255 255 255 255";
+      };
+      new GuiCheckBoxCtrl(NewSettingsGui_NotifyUsersBox) {
+         profile = "GuiCheckBoxProfile";
+         horizSizing = "relative";
+         vertSizing = "top";
+         position = "285 392";
+         extent = "103 28";
+         minExtent = "8 2";
+         enabled = "1";
+         visible = "1";
+         clipToParent = "1";
+         text = "Notify Users?";
+         groupNum = "-1";
+         buttonType = "ToggleButton";
+		 command = "$Pref::Client::ZZZZZZ::PrefsNotifyUsers = NewSettingsGui_NotifyUsersBox.getValue();";
+      };
+   };
+};
+//--- OBJECT WRITE END ---

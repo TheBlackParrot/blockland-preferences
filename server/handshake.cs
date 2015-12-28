@@ -14,9 +14,10 @@ package BLPrefServerPackage {
 	}
 
 	function GameConnection::autoAdminCheck(%client) {
-		%admin = %client.BLP_isAllowedUse();
-		commandToClient(%client, 'hasPrefSystem', $BLPrefs::Version, %admin);
-		return %admin;
+		%aac = Parent::autoAdminCheck(%client);
+		
+		commandToClient(%client, 'hasPrefSystem', $BLPrefs::Version, %client.BLP_isAllowedUse());
+		return %aac;
 	}
 
 	function deactivateServerPackages() { //preload fix

@@ -4,9 +4,11 @@
 // i was considering just creating a dummy scriptobject to store these functions in so they appear on a dump of the object
 // but you could just, y'know, look here
 
+// Chris's todo: move my shit in here :c
+
 function BLP_alNum(%str) {
 	if(%str $= "") {
-		return;
+		return "";
 	}
 
 	// if there's a better way to strip a string of every non-alphanumeric character, do replace this

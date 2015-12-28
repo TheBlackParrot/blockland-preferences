@@ -1,10 +1,10 @@
 function registerServerSettingPrefs() {
 	%cat = "Blockland";
-	%icon = "blockland";
+	%icon = "blLogo";
 
 	registerPref(%cat, "General", "Server Name", "string", "$Pref::Server::Name", $Pref::Server::Name, "64 1", "updateServerSetting", 0);
 	registerPref(%cat, "General", "Welcome Message", "string", "$Pref::Server::WelcomeMessage", $Pref::Server::WelcomeMessage, "512 0", "updateServerSetting", 0);
-	registerPref(%cat, "General", "Maximum Players", "number", "$Pref::Server::MaxPlayers", $Pref::Server::MaxPlayers, "1 99 0", "updateServerSetting", 0);
+	registerPref(%cat, "General", "Maximum Players", "playercount", "$Pref::Server::MaxPlayers", $Pref::Server::MaxPlayers, "1 99", "updateServerSetting", 0);
 	registerPref(%cat, "Security", "Server Password", "string", "$Pref::Server::Password", $Pref::Server::Password, "512 0", "updateServerSetting", 0, 1);
 	registerPref(%cat, "Security", "Admin Password", "string", "$Pref::Server::AdminPassword", $Pref::Server::AdminPassword, "512 0", "updateServerSetting", 0, 1);
 	registerPref(%cat, "Security", "Super Admin Password", "string", "$Pref::Server::SuperAdminPassword", $Pref::Server::SuperAdminPassword, "512 0", "updateServerSetting", 0, 1);
@@ -20,6 +20,8 @@ function registerServerSettingPrefs() {
 	registerPref(%cat, "Gameplay", "Too Far Distance", "number", "$Pref::Server::TooFarDistance", $Pref::Server::TooFarDistance, "1 999999 0", "updateServerSetting", 0);
 	registerPref(%cat, "Gameplay", "Wrench events are admin only?", "boolean", "$Pref::Server::WrenchEventsAdminOnly", $Pref::Server::WrenchEventsAdminOnly, "", "updateServerSetting", 0);
 
+	registerPrefGroupIcon(%cat, %icon);
+	
 	// as an example later on with colors, allow all player shapeNameColors to be set
 
 	$BLPrefs::AddedServerSettings = true;

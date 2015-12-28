@@ -1,4 +1,6 @@
-function serverCmdGetBLPrefCategories(%client) {
+// client communication commands are gone for now
+// will rewrite them when ready - chris
+function serverCmdRequestPrefCategories(%client) {
 	%group = PreferenceContainerGroup;
 	if(!isObject(%group)) {
 		echo("\c4" @ %client.name SPC "requested preferences, but the container group doesn't exist. This shouldn't be happening.");
@@ -15,40 +17,46 @@ function serverCmdGetBLPrefCategories(%client) {
 		if($Pref::BLPrefs::ServerDebug) {
 			echo("\c4Sending" SPC %row.category @ "...");
 		}
-		commandToClient(%client, 'addCategory', %row.category, %row.icon);
+		commandToClient(%client, 'ReceiveCategory', %i, %row.category, %row.icon);
 	}
 }
 
-function serverCmdGetBLPrefCategory(%client, %category) {
-	//%group = PreferenceContainerGroup;
-	%group = (BLP_alNum(%category) @ "Prefs");
+function serverCmdRequestCategoryPrefs(%client, %anID, %failsafe) {
+	%group = PreferenceContainerGroup.getObject(%anID);
+	
+	if(%failsafe !$= "")
+		return; // this should never happen
+	
 	if(!isObject(%group)) {
-		echo("\c4" @ %client.name SPC "requested preferences, but the container group doesn't exist. This shouldn't be happening.");
+		echo("\c4" @ %client.name SPC "requested preferences, but the container group doesn't exist. This could be happening due to invalid requests or client bugs.");
+		serverCmdRequestCategoryPrefs(%client, 0, 1);
 		return;
 	}
-
+	
 	if(!%client.BLP_isAllowedUse()) {
 		return;
 	}
-
+	
+	// the groups made things SO MUCH SIMPLER
 	for(%i=0;%i<%group.getCount();%i++) {
 		%row = %group.getObject(%i);
-		if(!%first) {
-			%first = true;
-			commandToClient(%client, 'receivePref', %row.title, %row.type, %row.variable, eval("return" SPC %row.variable @ ";"), %row.params, %row.legacy);
-		} else {
-			commandToClient(%client, 'receivePref', %row.title, %row.type, %row.variable, eval("return" SPC %row.variable @ ";"), %row.params);
+		if($Pref::BLPrefs::ServerDebug) {
+			//echo("\c4Sending" SPC %row.title @ "...");
 		}
+		commandToClient(%client, 'ReceivePref', %anID, %i, %row.title, %row.devision, %row.type, %row.params, %row.defaultValue, %row.variable, %row.getValue());
 	}
-	commandToClient(%client, 'finishReceivePref');
 }
-//clientCmdAddPref(%addon, %title, %type, %variable, %value, %params, %icon)
-//commandToClient(%client, 'addPref', %row.category, %row.title, %row.type, %row.variable, eval("return" SPC %row.variable @ ";"), %row.params, %row.icon);
 
-function serverCmdupdateBLPref(%client, %varname, %newvalue, %announce) {
+function serverCmdUpdatePref(%client, %varname, %newvalue, %announce) {
 	//validate!
 	if(!%client.BLP_isAllowedUse())
 		return;
+	
+	if(getSimTime() - %client.lastChange >= 100) {
+		messageAll('MsgAdminForce', "\c3" @ %client.name SPC "\c6updated the server prefs.");
+	}
+	
+	%client.lastChange = getSimTime();
 
 	//we need to find the object
 	%pso = BlocklandPrefSO::findByVariable(%varname);
@@ -62,7 +70,7 @@ function serverCmdupdateBLPref(%client, %varname, %newvalue, %announce) {
 		%pso.updateValue(%newvalue, %client);
 
 		if($Pref::BLPrefs::ServerDebug) {
-			echo("\c4" @ %client.netname @ " set " @ %varname @ " to " @ %newvalue);
+			echo("\c4" @ %client.name @ "(BL_ID: " @ %client.bl_id @ ") set " @ %varname @ " to " @ %newvalue);
 		}
 
 		if(%announce) {
@@ -72,10 +80,10 @@ function serverCmdupdateBLPref(%client, %varname, %newvalue, %announce) {
 				%displayValue = expandEscape(%newvalue);
 			}
 			
-			if(!%pso.isSecret)
-				messageAll('MsgAdminForce', "\c6 + \c3" @ %client.netname SPC "\c6set\c3" SPC %pso.title SPC "\c6to\c3" SPC %displayValue);
+			if(!%pso.secret)
+				messageAll('', "\c6 + \c3" @ %pso.title SPC "\c6is now\c3" SPC %displayValue);
 			else
-				messageAll('MsgAdminForce', "\c6 + \c3" @ %client.netname SPC "\c6set\c3" SPC %pso.title);
+				messageAll('', "\c6 + \c3" @ %pso.title SPC "\c6was changed.");
 		}
 
 		for(%i = 0; %i < ClientGroup.getCount(); %i++) {

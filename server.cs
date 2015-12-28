@@ -52,7 +52,7 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 		case "numplayers":
 			%type = "playercount";
 
-		case "str":
+		case "str" or "mlstring":
 			%type = "string";
 
 		case "slide" or "range" or "float":
@@ -362,7 +362,7 @@ function BlocklandPrefSO::updateValue(%this, %value, %updater) {
 	}
 
 	// when storing datablocks, use their NAME.
-	if(%this.type == "datablock")
+	if(%this.type $= "datablock")
 		setGlobalByName(%this.variable, (%value).getName());
 	else {
 		setGlobalByName(%this.variable, %value);
@@ -395,7 +395,7 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 				%value = getSubStr(%value, 0, %this.maxLength);
 			}
 			if(%this.stripML) {
-				%value = stripMLControlChars(%value); // sure we couldn't have a MLString type?
+				%value = stripMLControlChars(%value); // sure we couldn't have a MLString type? Yes.
 			}
 
 		case "slider":
@@ -483,6 +483,7 @@ function BlocklandPrefSO::validateValue(%this, %value) {
 function BlocklandPrefSO::findByVariable(%var) { // there's gotta be a better way to do this
 	for(%i = 0; %i < PreferenceContainerGroup.getCount(); %i++) {
 		%group = PreferenceContainerGroup.getObject(%i);
+		
 		for(%j = 0; %j < %group.getCount(); %j++) {
 			%pso = %group.getObject(%j);
 			if(%pso.variable $= %var) {
