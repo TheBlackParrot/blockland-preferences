@@ -19,7 +19,7 @@ if(!isObject(PreferenceContainerGroup)) {
 
 $Pref::BLPrefs::ServerDebug = true;
 %Pref::BLPrefs::iconDefault = "wrench";
-$BLPrefs::Version = "0.0-dev";
+$BLPrefs::Version = "1.0-beta";
 
 exec("./support/admin.cs");
 exec("./support/lesseval.cs");

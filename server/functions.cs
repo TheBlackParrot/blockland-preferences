@@ -39,3 +39,7 @@ function GameConnection::BLP_isAllowedUse(%this) {
 	}
 	return 0;
 }
+
+function getFirstWord(%str) {
+	return getWord(%str, 0);
+}
