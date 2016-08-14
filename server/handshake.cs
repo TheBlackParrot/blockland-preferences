@@ -26,6 +26,7 @@ package BLPrefServerPackage {
 			activatePackage(BLPrefServerPackage);
 			activatePackage(BLPrefCompatibilityPackage);
 			activatePackage(BLPrefBL_IDPackage);
+			activatePackage(BLPrefSaveLoadPackage);
 		}
 	}
 };
