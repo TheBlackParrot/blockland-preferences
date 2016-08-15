@@ -3,6 +3,7 @@
 //    -- TheBlackParrot (BL_ID 18701)
 //    -- Jincux (BL_ID 9789)
 // 	  -- Chrisbot6 (BL_ID 12233)
+// 	  -- Paperwork (BL_ID 636)
 
 if($BLPrefs::didPreload && !$BLPrefs::Debug) {
 	echo("Preferences already preloaded, nothing to do here.");
@@ -18,8 +19,14 @@ if(!isObject(PreferenceContainerGroup)) {
 }
 
 $Pref::BLPrefs::ServerDebug = true;
-%Pref::BLPrefs::iconDefault = "wrench";
-$BLPrefs::Version = "1.0-beta";
+$Pref::BLPrefs::iconDefault = "wrench";
+$BLPrefs::Version = "1.1-beta";
+
+if($Pref::BLPrefs::AllowedRank $= "")
+	$Pref::BLPrefs::AllowedRank = "3";
+
+if(!$BLPrefs::Init)
+	$BLPrefs::PrefCount = -1;
 
 exec("./support/admin.cs");
 exec("./support/lesseval.cs");
@@ -330,7 +337,20 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 
 			%pref.defaultValue = strreplace(%prefsAsFields, "" TAB "", %pref.delimiter);
 	}
-
+	
+	%blacklist = "$Pref::BLPrefs::AllowedRank $Pref::Server::Name $Pref::Server::WelcomeMessage $Pref::Server::MaxPlayers $Pref::Server::Password $Pref::Server::AdminPassword $Pref::Server::SuperAdminPassword $Pref::Server::ETardFilter $Pref::Server::ETardList $Pref::Server::AutoAdminList $Pref::Server::AutoSuperAdminList $Pref::Server::FallingDamage $Pref::Server::MaxBricksPerSecond $Pref::Server::RandomBrickColor $Pref::Server::TooFarDistance $Pref::Server::WrenchEventsAdminOnly";
+	for(%i = 0; %i < getWordCount(%blacklist); %i++)
+		if(%variable $= getWord(%blacklist, %i))
+			return %pref;
+	
+	%newVariable = true;
+	for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++)
+		if($BLPrefs::Pref[%i] $= %variable)
+			%newVariable = false;
+	
+	if(%newVariable)
+		$BLPrefs::Pref[$BLPrefs::PrefCount++] = %variable;
+	
 	return %pref;
 }
 
@@ -384,7 +404,7 @@ function BlocklandPrefSO::updateValue(%this, %value, %updater) {
 }
 
 function BlocklandPrefSO::validateValue(%this, %value) {
-	echo("validating" SPC %value SPC "(" @ %this @ ")");
+	//echo("validating" SPC %value SPC "(" @ %this @ ")");
 
 	// this is where the SO's come in handy
 	switch$(%this.type) {
@@ -520,5 +540,83 @@ if(!$BLPrefs::AddedServerSettings) {
 	  %file = findNextFile("./server/prefs/*.cs");
 	}
 }
+
+function loadBLPreferences() {
+	if($BLPrefs::Init)
+		return;
+	
+	%fo = new FileObject();
+	%fo.openForRead("config/server/BLPrefs/prefs.cs");
+	while(!%fo.isEOF()) {
+		%variable = getWord(%fo.readLine(), 0);
+		
+		%newVariable = true;
+		
+		for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++)
+			if($BLPrefs::Pref[%i] $= %variable)
+				%newVariable = false;
+		
+		if(%newVariable)
+			$BLPrefs::Pref[$BLPrefs::PrefCount++] = %variable;
+	}
+	%fo.close();
+	%fo.delete();
+}
+
+loadBLPreferences();
+
+function saveBLPreferences() {
+	if(!$BLPrefs::hasLoadedPrefs)
+		return;
+	
+	%fo = new FileObject();
+	%fo.openForWrite("config/server/BLPrefs/prefs.cs");
+	for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++) {
+		%variable = $BLPrefs::Pref[%i];
+		%fo.writeLine(%variable @ " = \"" @ getGlobalByName(%variable) @ "\";"); // export(); doesn't return anything :(
+	}
+	%fo.close();
+	%fo.delete();
+	
+	export("$Pref::Server::*", "config/server/prefs.cs");
+}
+
+package BLPrefSaveLoadPackage {
+	function GameConnection::autoAdminCheck(%client) {
+		parent::autoAdminCheck(%client);
+		
+		if(!$BLPrefs::hasLoadedPrefs) {
+			if(isFile(%blprefs = "config/server/BLPrefs/prefs.cs")) {
+				exec(%blprefs);
+				
+				if(%client.hasPrefSystem && %client.isAdmin) {
+					%fo = new FileObject();
+					%fo.openForRead(%blprefs);
+					while(!%fo.isEOF()) {
+						%pref = getWord(%fo.readLine(), 0);
+						commandToClient(%client, 'updateBLPref', %pref, getGlobalByName(%pref));
+					}
+					%fo.close();
+					%fo.delete();
+				}
+			}
+			
+			$BLPrefs::hasLoadedPrefs = true;
+		}
+	}
+	
+	function onServerDestroyed() {
+		saveBLPreferences();
+		
+		parent::onServerDestroyed();
+	}
+	
+	function onExit() {
+		saveBLPreferences();
+		
+		parent::onExit();
+	}
+};
+activatePackage(BLPrefSaveLoadPackage);
 
 $BLPrefs::Init = true;
