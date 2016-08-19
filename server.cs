@@ -20,7 +20,7 @@ if(!isObject(PreferenceContainerGroup)) {
 
 $Pref::BLPrefs::ServerDebug = true;
 $Pref::BLPrefs::iconDefault = "wrench";
-$BLPrefs::Version = "1.1-beta";
+$BLPrefs::Version = "1.1.1-beta";
 
 if($Pref::BLPrefs::AllowedRank $= "")
 	$Pref::BLPrefs::AllowedRank = "3";
@@ -566,7 +566,7 @@ function loadBLPreferences() {
 loadBLPreferences();
 
 function saveBLPreferences() {
-	if(!$BLPrefs::hasLoadedPrefs)
+	if(!$BLPrefs::serverLoadedPrefs)
 		return;
 	
 	%fo = new FileObject();
@@ -585,28 +585,30 @@ package BLPrefSaveLoadPackage {
 	function GameConnection::autoAdminCheck(%client) {
 		parent::autoAdminCheck(%client);
 		
-		if(!$BLPrefs::hasLoadedPrefs) {
-			if(isFile(%blprefs = "config/server/BLPrefs/prefs.cs")) {
+		if(isFile(%blprefs = "config/server/BLPrefs/prefs.cs")) {
+			if(!$BLPrefs::serverLoadedPrefs) {
 				exec(%blprefs);
 				
-				if(%client.hasPrefSystem && %client.isAdmin) {
-					%fo = new FileObject();
-					%fo.openForRead(%blprefs);
-					while(!%fo.isEOF()) {
-						%pref = getWord(%fo.readLine(), 0);
-						commandToClient(%client, 'updateBLPref', %pref, getGlobalByName(%pref));
-					}
-					%fo.close();
-					%fo.delete();
-				}
+				$BLPrefs::serverLoadedPrefs = true;
 			}
-			
-			$BLPrefs::hasLoadedPrefs = true;
+
+			if(%client.hasPrefSystem && %client.isAdmin) {
+				%fo = new FileObject();
+				%fo.openForRead(%blprefs);
+				while(!%fo.isEOF()) {
+					%pref = getWord(%fo.readLine(), 0);
+					commandToClient(%client, 'updateBLPref', %pref, getGlobalByName(%pref));
+				}
+				%fo.close();
+				%fo.delete();
+			}
 		}
 	}
 	
 	function onServerDestroyed() {
 		saveBLPreferences();
+		
+		$BLPrefs::serverLoadedPrefs = false;
 		
 		parent::onServerDestroyed();
 	}
