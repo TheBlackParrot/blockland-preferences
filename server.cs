@@ -20,7 +20,7 @@ if(!isObject(PreferenceContainerGroup)) {
 
 $Pref::BLPrefs::ServerDebug = true;
 $Pref::BLPrefs::iconDefault = "wrench";
-$BLPrefs::Version = "1.1.1-beta";
+$BLPrefs::Version = "1.1.2-beta";
 
 if($Pref::BLPrefs::AllowedRank $= "")
 	$Pref::BLPrefs::AllowedRank = "3";
@@ -589,20 +589,20 @@ package BLPrefSaveLoadPackage {
 			if(!$BLPrefs::serverLoadedPrefs) {
 				exec(%blprefs);
 				
-				$BLPrefs::serverLoadedPrefs = true;
-			}
-
-			if(%client.hasPrefSystem && %client.isAdmin) {
-				%fo = new FileObject();
-				%fo.openForRead(%blprefs);
-				while(!%fo.isEOF()) {
-					%pref = getWord(%fo.readLine(), 0);
-					commandToClient(%client, 'updateBLPref', %pref, getGlobalByName(%pref));
+				if(%client.hasPrefSystem && %client.isAdmin) {
+					%fo = new FileObject();
+					%fo.openForRead(%blprefs);
+					while(!%fo.isEOF()) {
+						%pref = getWord(%fo.readLine(), 0);
+						commandToClient(%client, 'updateBLPref', %pref, getGlobalByName(%pref));
+					}
+					%fo.close();
+					%fo.delete();
 				}
-				%fo.close();
-				%fo.delete();
 			}
 		}
+		
+		$BLPrefs::serverLoadedPrefs = true;
 	}
 	
 	function onServerDestroyed() {
