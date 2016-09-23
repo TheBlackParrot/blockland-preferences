@@ -11,7 +11,7 @@ $ORBS::Hooks::ServerControl = true; // yup oRBs too
 if(!isFile("Add-Ons/System_ReturnToBlockland/server.cs")) { // the addon does not need to be *valid*, the server.cs just needs to exist
 	%file = new FileObject();
 	%file.openForWrite("Add-Ons/System_ReturnToBlockland/server.cs");
-	%file.writeLine("// This is an empty, fake RTB folder so that RTB prefs will load.");
+	%file.writeLine("// This is an empty, fake RTB folder so that RTB prefs will load."); // if you're going to change this, ensure file CRC is changed on line 63
 	%file.close();
 	%file.delete();
 }
@@ -56,5 +56,17 @@ package BLPrefCompatibilityPackage {
 			parent::oRBs_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback);
 		}
 	}
+  
+  function ServerSettingsGui::onWake(%this) {
+    parent::onWake(%this);
+    
+    %crc = "-1587284330";
+    
+    if(getFileCRC("Add-Ons/System_ReturnToBlockland/server.cs") $= %crc) {
+      $ServerSettingsGui::UseRTB = false;
+      ServerSettingsGui_RTBLabel.setVisible(false);
+      ServerSettingsGui_UseRTB.setVisible(false);
+    }
+  }
 };
 activatePackage(BLPrefCompatibilityPackage);

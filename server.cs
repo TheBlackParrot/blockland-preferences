@@ -2,8 +2,8 @@
 // -- Contributors:
 //    -- TheBlackParrot (BL_ID 18701)
 //    -- Jincux (BL_ID 9789)
-// 	  -- Chrisbot6 (BL_ID 12233)
-// 	  -- Paperwork (BL_ID 636)
+//    -- Chrisbot6 (BL_ID 12233)
+//    -- Paperwork (BL_ID 636)
 
 if($BLPrefs::didPreload && !$BLPrefs::Debug) {
 	echo("Preferences already preloaded, nothing to do here.");
@@ -20,10 +20,10 @@ if(!isObject(PreferenceContainerGroup)) {
 
 $Pref::BLPrefs::ServerDebug = true;
 $Pref::BLPrefs::iconDefault = "wrench";
-$BLPrefs::Version = "1.1.2-beta";
+$BLPrefs::Version = "1.1.3-beta";
 
 if($Pref::BLPrefs::AllowedRank $= "")
-	$Pref::BLPrefs::AllowedRank = "3";
+	$Pref::BLPrefs::AllowedRank = "2";
 
 if(!$BLPrefs::Init)
 	$BLPrefs::PrefCount = -1;
