@@ -69,7 +69,7 @@ function serverCmdUpdatePref(%client, %varname, %newvalue, %announce) {
 		%pso.updateValue(%newvalue, %client);
 
 		if($Pref::BLPrefs::ServerDebug) {
-			echo("\c4" @ %client.name @ " (BL_ID: " @ %client.getBLID() @ ") set " @ %varname @ " to " @ %newvalue);
+			echo("\c4[Support_Preferences] " @ %client.name @ " (BL_ID: " @ %client.getBLID() @ ") set " @ %varname @ " to " @ %newvalue);
 		}
 
 		if(%announce) {
