@@ -46,28 +46,30 @@ function serverCmdRequestCategoryPrefs(%client, %anID, %failsafe) {
 
 function serverCmdUpdatePref(%client, %varname, %newvalue, %announce) {
 	//validate!
-	if(!%client.BLP_isAllowedUse())
+	if(!%client.BLP_isAllowedUse()) {
 		return;
+  }
 
 	//we need to find the object
 	%pso = BlocklandPrefSO::findByVariable(%varname);
 	if(%pso) {
-		if(%client.lastChange !$= %pso.category) {
-			messageAll('MsgAdminForce', "\c3" @ %client.getPlayerName() SPC "\c6updated the \c3" @ %pso.category @ "\c6 prefs.");
+		if(getSimTime() - %client.lastChangedCat[%pso.category] >= 100) {
+			messageAll('MsgAdminForce', "\c3" @ %client.name SPC "\c6updated the \c3" @ %pso.category @ "\c6 prefs.");
 		}
 
-		%client.lastChange = %pso.category;
+		%client.lastChangedCat[%pso.category] = getSimTime();
 
 		if(%pso.hostOnly) {
-			if(%client.getBLID() != getNumKeyId() && %client.getBLID() != 999999)
+			if(%client.getBLID() != getNumKeyId() && %client.getBLID() != 999999) {
 				return;
+      }
 		}
 
 		%newvalue = %pso.validateValue(%newvalue);
 		%pso.updateValue(%newvalue, %client);
 
 		if($Pref::BLPrefs::ServerDebug) {
-			echo("\c5[Support_Preferences] " @ %client.getPlayerName() @ " (BL_ID: " @ %client.getBLID() @ ") set " @ %varname @ " to " @ %newvalue);
+			echo("\c4" @ %client.name @ " (BL_ID: " @ %client.getBLID() @ ") set " @ %varname @ " to " @ %newvalue);
 		}
 
 		if(%announce) {
@@ -89,10 +91,10 @@ function serverCmdUpdatePref(%client, %varname, %newvalue, %announce) {
 				commandToClient(%cl, 'updateBLPref', %varname, %newvalue);
 			}
 		}
-		
-		saveBLPreferences();
+    
+    saveBLPreferences();
 	} else {
 		//so they tried to update a variable that doesn't exist...
-		echo("\c2[Support_Preferences] Variable \"" @ %varname @ "\" doesn't exist!");
+		warn("Variable \"" @ %varname @ "\" doesn't exist!");
 	}
 }

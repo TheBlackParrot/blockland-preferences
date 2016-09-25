@@ -9,9 +9,9 @@ if($BLPrefs::didPreload && !$BLPrefs::Debug && $BLPrefs::Init) {
   prunePrefs();
 	return;
 } else if(!$BLPrefs::PreLoad) {
-	echo("\c2[Support_Preferences] Preloader NOT installed. Some prefs may not be available.");
+	echo("\c2[Support_Preferences] Preloader NOT installed. Some prefs may not be available!");
 } else if($BLPrefs::Debug) {
-	echo("\c4[Support_Preferences] Re-executing, development mode");
+	echo("\c4[Support_Preferences] Re-executing, development mode!");
 }
 
 if(!isObject(PreferenceContainerGroup)) {
@@ -46,9 +46,8 @@ if($Pref::PreLoadScriptLauncherVersion < 1) {
 }
 
 function prunePrefs() {
-  echo("\c4[Support_Preferences] Pruning disabled add-ons' preferences.");
-  
   %groups = "";
+  %pruned = 0;
   
   for(%i = 0; %i < getWordCount($BLPrefs::PrefGroups); %i++) {
     %group = getWord($BLPrefs::PrefGroups, %i);
@@ -56,16 +55,26 @@ function prunePrefs() {
     if(isObject(%group)) {
       if(getGlobalByName("$ADDON__" @ %group.file) == -1) {
         %group.delete();
+        %pruned++;
       } else if (getGlobalByName("$ADDON__" @ %group.file) == 1) {
         %groups = trim(%groups SPC %group);
       }
     }
   }
   
+  if(%pruned > 0) {
+    echo("\c4[Support_Preferences] Pruning " @ %pruned @ " disabled add-ons' preferences.");
+  } else {
+    echo("\c4[Support_Preferences] No preferences to prune.");
+    return false;
+  }
+  
   $BLPrefs::PrefGroups = %groups;
+  
+  return true;
 }
 
-function registerPref(%addon, %dev, %title, %type, %variable, %file, %default, %params, %callback, %legacy, %isSecret, %isHostOnly)
+function registerPref(%addon, %dev, %title, %type, %variable, %filename, %default, %params, %callback, %legacy, %isSecret, %isHostOnly)
 {
 	// %leagacy = 1 if it's added via a compatibility wrapper
 	if(%dev $= "") {
@@ -604,10 +613,10 @@ if(!$BLPrefs::AddedServerSettings) {
 
 function loadBLPreferences() {
   if(isFile($BLPrefs::File)) {
-    // echo("\c4[Support_Preferences] Loading BL Preferences...");
+    // echo("\c5[Support_Preferences] Loading BL Preferences...");
     
     if(!isFile(%backup = "config/server/BLPrefs/prefs.backup")) {
-      echo("\c4[Support_Preferences] Backing up preferences file...");
+      echo("\c2[Support_Preferences] Backing up preferences file...");
       fileCopy($BLPrefs::File, %backup);
     }
     
@@ -664,7 +673,7 @@ function saveBLPreferences() {
     return;
   }
   
-  // echo("\c4[Support_Preferences] Saving BL Preferences...");
+  // echo("\c5[Support_Preferences] Saving BL Preferences...");
   
 	%fo = new FileObject();
 	%fo.openForWrite($BLPrefs::File);

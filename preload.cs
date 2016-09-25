@@ -9,4 +9,4 @@ $BLPrefs::PreLoad = true; //let the add-on know that it's being run NOW, not nor
 exec("./server.cs"); //we should load up first. That way, we capture ALL the rtb legacy prefs, not just the ones after us
 $BLPrefs::didPreload = true;
 
-echo("\c5[Support_Preferences] Version " @ $BLPrefs::Version @ " loaded.");
+echo("\c4[Support_Preferences] Version " @ $BLPrefs::Version @ " loaded!");

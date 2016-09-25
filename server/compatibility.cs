@@ -17,9 +17,9 @@ if(!isFile("Add-Ons/System_ReturnToBlockland/server.cs")) { // the addon does no
 }
 
 package BLPrefCompatibilityPackage {
-	function RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback) {
+	function RTB_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback) {
 		if(isFunction("RTB_registerPref")) {
-			parent::RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback);
+			parent::RTB_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
 		}
 
 		%type = getWord(%params, 0);
@@ -44,16 +44,16 @@ package BLPrefCompatibilityPackage {
 
 		// type checks moved to server.cs, considering them shorthand
 		// some prefs have "$", some don't
-		registerPref(%cat, %sub, %name, %type, "$" @ strReplace(%variable, "$", ""), %file, %default, getWords(%params, 1), %callback, 1);
+		registerPref(%cat, %sub, %name, %type, "$" @ strReplace(%variable, "$", ""), %filename, %default, getWords(%params, 1), %callback, 1);
 	}
 
 	// because oRBs is the same thing at this point -_-
 	// so much for "innovation", amirite?
-	function oRBs_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback) {
-		RTB_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback);
+	function oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback) {
+		RTB_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
 
 		if(isFunction("oRBs_registerPref")) {
-			parent::oRBs_registerPref(%name, %addon, %variable, %params, %file, %default, %requiresRestart, %hostOnly, %callback);
+			parent::oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
 		}
 	}
   
