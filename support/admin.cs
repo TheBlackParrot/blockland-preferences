@@ -1,5 +1,5 @@
 function GameConnection::checkAdminStatus(%client) {
-	%bl_id = %client.bl_id;
+	%bl_id = %client.getBLID();
 	
 	if(%bl_id == getNumKeyId() || %bl_id == 999999) {
 		return 2; // host

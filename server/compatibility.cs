@@ -9,11 +9,11 @@ if(isFile("Add-Ons/System_oRBs/hooks/serverControl.cs"))
 $ORBS::Hooks::ServerControl = true; // yup oRBs too
 
 if(!isFile("Add-Ons/System_ReturnToBlockland/server.cs")) { // the addon does not need to be *valid*, the server.cs just needs to exist
-	%file = new FileObject();
-	%file.openForWrite("Add-Ons/System_ReturnToBlockland/server.cs");
-	%file.writeLine("// This is an empty, fake RTB folder so that RTB prefs will load."); // if you're going to change this, ensure file CRC is changed on line 63
-	%file.close();
-	%file.delete();
+	%fo = new FileObject();
+	%fo.openForWrite("Add-Ons/System_ReturnToBlockland/server.cs");
+	%fo.writeLine("// This is an empty, fake RTB folder so that RTB prefs will load."); // if you're going to change this, ensure file CRC is changed on line 63
+	%fo.close();
+	%fo.delete();
 }
 
 package BLPrefCompatibilityPackage {
@@ -44,7 +44,7 @@ package BLPrefCompatibilityPackage {
 
 		// type checks moved to server.cs, considering them shorthand
 		// some prefs have "$", some don't
-		registerPref(%cat, %sub, %name, %type, "$" @ strReplace(%variable, "$", ""), %default, getWords(%params, 1), %callback, 1);
+		registerPref(%cat, %sub, %name, %type, "$" @ strReplace(%variable, "$", ""), %file, %default, getWords(%params, 1), %callback, 1);
 	}
 
 	// because oRBs is the same thing at this point -_-

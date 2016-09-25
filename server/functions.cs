@@ -23,7 +23,7 @@ function BLP_alNum(%str) {
 function GameConnection::BLP_isAllowedUse(%this) {
 	switch($Pref::BLPrefs::AllowedRank) {
 		case 3:
-			if(%this.bl_id == 999999 || %this.bl_id == getNumKeyID()) {
+			if(%this.getBLID() == 999999 || %this.getBLID() == getNumKeyID()) {
 				return 1;
 			}
 
