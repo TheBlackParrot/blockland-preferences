@@ -53,10 +53,10 @@ function prunePrefs() {
     %group = getWord($BLPrefs::PrefGroups, %i);
     
     if(isObject(%group)) {
-      if(getGlobalByName("$ADDON__" @ %group.file) == -1) {
+      if(getGlobalByName("$AddOn__" @ %group.file) == -1) {
         %group.delete();
         %pruned++;
-      } else if (getGlobalByName("$ADDON__" @ %group.file) == 1) {
+      } else if (getGlobalByName("$AddOn_" @ %group.file) == 1) {
         %groups = trim(%groups SPC %group);
       }
     }
