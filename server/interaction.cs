@@ -48,7 +48,7 @@ function serverCmdUpdatePref(%client, %varname, %newvalue, %announce) {
 	//validate!
 	if(!%client.BLP_isAllowedUse()) {
 		return;
-  }
+	}
 
 	//we need to find the object
 	%pso = BlocklandPrefSO::findByVariable(%varname);
@@ -62,7 +62,7 @@ function serverCmdUpdatePref(%client, %varname, %newvalue, %announce) {
 		if(%pso.hostOnly) {
 			if(%client.getBLID() != getNumKeyId() && %client.getBLID() != 999999) {
 				return;
-      }
+			}
 		}
 
 		%newvalue = %pso.validateValue(%newvalue);
@@ -91,8 +91,8 @@ function serverCmdUpdatePref(%client, %varname, %newvalue, %announce) {
 				commandToClient(%cl, 'updateBLPref', %varname, %newvalue);
 			}
 		}
-    
-    saveBLPreferences();
+		
+		saveBLPreferences();
 	} else {
 		//so they tried to update a variable that doesn't exist...
 		warn("Variable \"" @ %varname @ "\" doesn't exist!");
