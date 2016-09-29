@@ -56,22 +56,19 @@ function prunePrefs() {
       if(getGlobalByName("$AddOn__" @ %group.file) == -1) {
         %group.delete();
         %pruned++;
-      } else if (getGlobalByName("$AddOn_" @ %group.file) == 1) {
+      } else if (getGlobalByName("$AddOn__" @ %group.file) == 1) {
         %groups = trim(%groups SPC %group);
       }
     }
   }
   
   if(%pruned > 0) {
-    echo("\c4[Support_Preferences] Pruning " @ %pruned @ " disabled add-ons' preferences.");
+    echo("\c4[Support_Preferences] Pruned " @ %pruned @ " disabled add-ons' preferences.");
   } else {
     echo("\c4[Support_Preferences] No preferences to prune.");
-    return false;
   }
   
   $BLPrefs::PrefGroups = %groups;
-  
-  return true;
 }
 
 function registerPref(%addon, %dev, %title, %type, %variable, %filename, %default, %params, %callback, %legacy, %isSecret, %isHostOnly)
@@ -142,7 +139,7 @@ function registerPref(%addon, %dev, %title, %type, %variable, %filename, %defaul
 
 	if(stripos(%valid, ":" @ %type) == -1)
 	{
-		echo("\c2[Support_Preferences] Invalid pref type:" SPC %type);
+		echo("\c2[Support_Preferences] Invalid pref type: " @ %type);
 		return;
 	}
 
@@ -151,23 +148,32 @@ function registerPref(%addon, %dev, %title, %type, %variable, %filename, %defaul
 		%group = new ScriptGroup(BlocklandPrefGroup) {
 			class = "PreferenceGroup";
 			title = BLP_alNum(%addon);
-      file = %file;
+      file = %filename;
 			legacy = %legacy;
 			category = %addon;
 			icon = $Pref::BlPrefs::iconDefault;
-		};
-    
-    $BLPrefs::PrefGroups = trim($BLPrefs::PrefGroups SPC %groupName);
+		}; 
 	} else {
 		%group = (%groupName).getID();
 	}
+  
+  if(strpos($BLPrefs::PrefGroups, %groupName) == -1) {
+    $BLPrefs::PrefGroups = trim($BLPrefs::PrefGroups SPC %groupName);
+  }
+  
+  %find = findBLPref(%variable);
+  
+  if(%find != -1) {
+    setGlobalByName(getWord(%find, 0), getWord(%find, 1));
+  }
 
-	if(%legacy)
+	if(%legacy) {
 		%group.icon = "bricks";
+  }
 
 	for(%i=0;%i<%group.getCount();%i++) {
 		if(%variable $= %group.getObject(%i).variable) {
-			echo("\c2[Support_Preferences] " @ %variable SPC "has already been registered, skipping...");
+			// echo("\c2[Support_Preferences] " @ %variable @ " has already been registered, skipping...");
 			return;
 		}
 	}
@@ -177,7 +183,7 @@ function registerPref(%addon, %dev, %title, %type, %variable, %filename, %defaul
 		class = "Preference";
 		category = %addon;
 		title = %title;
-    file = %file;
+    file = %filename;
 		defaultValue = %default;
 		variable = %variable;
 		type = %type;
@@ -380,9 +386,6 @@ function registerPref(%addon, %dev, %title, %type, %variable, %filename, %defaul
 			return %pref;
     }
   }
-  
-  %find = findBLPref(%variable);
-  setGlobalByName(getWord(%find, 0), getWord(%find, 1));
 	
 	%newVariable = true;
 	for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++) {
@@ -429,8 +432,7 @@ function findBLPref(%variable) {
 	%fo.delete();
   
   if(%pref $= "") {
-    echo("\c2[Support_Preferences] Invalid preference: " @ %variable);
-    return "";
+    return -1;
   }
   
   %var = getWord(%pref, 0);
