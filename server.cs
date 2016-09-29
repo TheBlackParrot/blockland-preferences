@@ -1,5 +1,5 @@
-// ---=== Blockland Preference System ===---
-// -- Contributors:
+//	---=== Blockland Preference System ===---
+//	-- Contributors:
 //		-- TheBlackParrot (BL_ID 18701)
 //		-- Jincux (BL_ID 9789)
 //		-- Chrisbot6 (BL_ID 12233)
