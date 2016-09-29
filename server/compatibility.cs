@@ -56,17 +56,17 @@ package BLPrefCompatibilityPackage {
 			parent::oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
 		}
 	}
-  
-  function ServerSettingsGui::onWake(%this) {
-    parent::onWake(%this);
-    
-    %crc = "-1587284330";
-    
-    if(getFileCRC("Add-Ons/System_ReturnToBlockland/server.cs") $= %crc) {
-      $ServerSettingsGui::UseRTB = false;
-      ServerSettingsGui_RTBLabel.setVisible(false);
-      ServerSettingsGui_UseRTB.setVisible(false);
-    }
-  }
+	
+	function ServerSettingsGui::onWake(%this) {
+		parent::onWake(%this);
+		
+		%crc = "-1587284330";
+		
+		if(getFileCRC("Add-Ons/System_ReturnToBlockland/server.cs") $= %crc) {
+			$ServerSettingsGui::UseRTB = false;
+			ServerSettingsGui_RTBLabel.setVisible(false);
+			ServerSettingsGui_UseRTB.setVisible(false);
+		}
+	}
 };
 activatePackage(BLPrefCompatibilityPackage);

@@ -64,38 +64,38 @@ function autoAdminsChanged(%value, %client, %prefSO) {
 
 		if(%status $= 2)
 		{
-		   if(%cl.isSuperAdmin)
-			  continue;
-		   
-		   %cl.isAdmin = 1;
-		   %cl.isSuperAdmin = 1;
-		   %cl.sendPlayerListUpdate();
-		   commandtoclient(%cl,'setAdminLevel',2);
-		   messageAll('MsgAdminForce','\c2%1 has become Super Admin (Auto)', %cl.getPlayerName());
+			 if(%cl.isSuperAdmin)
+				continue;
+			 
+			 %cl.isAdmin = 1;
+			 %cl.isSuperAdmin = 1;
+			 %cl.sendPlayerListUpdate();
+			 commandtoclient(%cl,'setAdminLevel',2);
+			 messageAll('MsgAdminForce','\c2%1 has become Super Admin (Auto)', %cl.getPlayerName());
 		
-		   RTBSC_SendPrefList(%client);
+			 RTBSC_SendPrefList(%client);
 		}
 		else if(%status == 1)
 		{
-		   if(%cl.isAdmin)
-			  continue;
-		   
-		   %cl.isAdmin = 1;
-		   %cl.isSuperAdmin = 0;
-		   %cl.sendPlayerListUpdate();
-		   commandtoclient(%cl,'setAdminLevel',1);
-		   messageAll('MsgAdminForce','\c2%1 has become Admin (Auto)', %cl.getPlayerName());
+			 if(%cl.isAdmin)
+				continue;
+			 
+			 %cl.isAdmin = 1;
+			 %cl.isSuperAdmin = 0;
+			 %cl.sendPlayerListUpdate();
+			 commandtoclient(%cl,'setAdminLevel',1);
+			 messageAll('MsgAdminForce','\c2%1 has become Admin (Auto)', %cl.getPlayerName());
 		}
 		else if(%status == 0)
 		{
-		   if(!%cl.isAdmin)
-			  continue;
-		   
-		   %cl.isAdmin = 0;
-		   %cl.isSuperAdmin = 0;
-		   %cl.sendPlayerListUpdate();
-		   commandtoclient(%cl,'setAdminLevel',0);
-		   messageAll('MsgAdminForce','\c2%1 is no longer Admin.', %cl.getPlayerName());
+			 if(!%cl.isAdmin)
+				continue;
+			 
+			 %cl.isAdmin = 0;
+			 %cl.isSuperAdmin = 0;
+			 %cl.sendPlayerListUpdate();
+			 commandtoclient(%cl,'setAdminLevel',0);
+			 messageAll('MsgAdminForce','\c2%1 is no longer Admin.', %cl.getPlayerName());
 		}
 	}
 }
