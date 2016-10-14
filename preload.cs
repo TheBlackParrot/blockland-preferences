@@ -8,3 +8,5 @@ export("$AddOn__*", "config/server/ADD_ON_LIST.cs");
 $BLPrefs::PreLoad = true; //let the add-on know that it's being run NOW, not normally
 exec("./server.cs"); //we should load up first. That way, we capture ALL the rtb legacy prefs, not just the ones after us
 $BLPrefs::didPreload = true;
+
+echo("\c4[Support_Preferences] Version " @ $BLPrefs::Version @ " loaded!");

@@ -13,7 +13,7 @@ package BLPrefBL_IDPackage {
 		for(%i = 0; %i < $Pref::Server::bl_idRecords; %i++) {
 			%bl_id = getFirstWord($Pref::Server::bl_idRecord[%i+1]);
 			
-			if(%client.bl_id == %bl_id) {
+			if(%client.getBLID() == %bl_id) {
 				// append to this record.
 				%record = %i+1;
 				break;
@@ -25,7 +25,7 @@ package BLPrefBL_IDPackage {
 			%record = $Pref::Server::bl_idRecords++;
 		}
 		
-		$Pref::Server::bl_idRecord[%record] = %client.bl_id SPC %client.name;
+		$Pref::Server::bl_idRecord[%record] = %client.getBLID() SPC %client.getPlayerName();
 		
 		return Parent::autoAdminCheck(%client);
 	}

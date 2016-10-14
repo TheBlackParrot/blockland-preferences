@@ -7,23 +7,23 @@ function getFirstWord(%value) {
 // convenience from Server_Prefs
 function clampFloat(%float, %min, %max) {
 	%decPos = strPos(%float, ".");
-    %floatLen = strLen(getSubStr(%float, %decPos+1, 2));
-    if(%decPos != -1 && %floatLen != 0)
-    {
-        %value = mFloatLength(%float, %floatLen);
-   
-        if(%value > %max)
+		%floatLen = strLen(getSubStr(%float, %decPos+1, 2));
+		if(%decPos != -1 && %floatLen != 0)
+		{
+				%value = mFloatLength(%float, %floatLen);
+	 
+				if(%value > %max)
 			%value = max;
-      
-        if(%value < %min)
+			
+				if(%value < %min)
 			%value = %min;
-    }
+		}
 	else if(%decPos != -1)
-    {
+		{
 		%value = mClamp(%float, %min, %max) @ ".";
 	}
-    else 
-    {
+		else 
+		{
 		%value = mClamp(%float, %min, %max);
 	}
 	

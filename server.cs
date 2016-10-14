@@ -1,17 +1,17 @@
-// ---=== Blockland Preference System ===---
-// -- Contributors:
-//    -- TheBlackParrot (BL_ID 18701)
-//    -- Jincux (BL_ID 9789)
-// 	  -- Chrisbot6 (BL_ID 12233)
-// 	  -- Paperwork (BL_ID 636)
+//	---=== Blockland Preference System ===---
+//	-- Contributors:
+//		-- TheBlackParrot (BL_ID 18701)
+//		-- Jincux (BL_ID 9789)
+//		-- Chrisbot6 (BL_ID 12233)
+//		-- Paperwork (BL_ID 636)
 
-if($BLPrefs::didPreload && !$BLPrefs::Debug) {
-	echo("Preferences already preloaded, nothing to do here.");
+if($BLPrefs::didPreload && !$BLPrefs::Debug && $BLPrefs::Init) {
+	prunePrefs();
 	return;
 } else if(!$BLPrefs::PreLoad) {
-	warn("Preloader wasn't installed. Some prefs may not be available.");
+	echo("\c2[Support_Preferences] Preloader NOT installed. Some prefs may not be available!");
 } else if($BLPrefs::Debug) {
-	warn("Re-executing, development mode");
+	echo("\c4[Support_Preferences] Re-executing, development mode!");
 }
 
 if(!isObject(PreferenceContainerGroup)) {
@@ -20,13 +20,17 @@ if(!isObject(PreferenceContainerGroup)) {
 
 $Pref::BLPrefs::ServerDebug = true;
 $Pref::BLPrefs::iconDefault = "wrench";
-$BLPrefs::Version = "1.1.2-beta";
+$BLPrefs::Version = "1.2.0";
+$BLPrefs::File = "config/server/BLPrefs/prefs.cs";
 
-if($Pref::BLPrefs::AllowedRank $= "")
-	$Pref::BLPrefs::AllowedRank = "3";
+if($Pref::BLPrefs::AllowedRank $= "") {
+	$Pref::BLPrefs::AllowedRank = "2";
+}
 
-if(!$BLPrefs::Init)
+if(!$BLPrefs::Init) {
 	$BLPrefs::PrefCount = -1;
+	$BLPrefs::PrefGroups = "";
+}
 
 exec("./support/admin.cs");
 exec("./support/lesseval.cs");
@@ -41,10 +45,35 @@ if($Pref::PreLoadScriptLauncherVersion < 1) {
 	fileCopy("./support/preloader.cs", "config/main.cs");
 }
 
-function registerPref(%addon, %dev, %title, %type, %variable, %default, %params, %callback, %legacy, %isSecret, %isHostOnly)
+function prunePrefs() {
+	%groups = "";
+	%pruned = 0;
+	
+	for(%i = 0; %i < getWordCount($BLPrefs::PrefGroups); %i++) {
+		%group = getWord($BLPrefs::PrefGroups, %i);
+		
+		if(isObject(%group)) {
+			if(getGlobalByName("$AddOn__" @ %group.file) == -1) {
+				%group.delete();
+				%pruned++;
+			} else if (getGlobalByName("$AddOn__" @ %group.file) == 1) {
+				%groups = trim(%groups SPC %group);
+			}
+		}
+	}
+	
+	if(%pruned > 0) {
+		echo("\c4[Support_Preferences] Pruned " @ %pruned @ " disabled add-ons' preferences.");
+	} else {
+		echo("\c4[Support_Preferences] No preferences to prune.");
+	}
+	
+	$BLPrefs::PrefGroups = %groups;
+}
+
+function registerPref(%addon, %dev, %title, %type, %variable, %filename, %default, %params, %callback, %legacy, %isSecret, %isHostOnly)
 {
 	// %leagacy = 1 if it's added via a compatibility wrapper
-
 	if(%dev $= "") {
 		%dev = "General";
 	}
@@ -110,7 +139,7 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 
 	if(stripos(%valid, ":" @ %type) == -1)
 	{
-		warn("Invalid pref type:" SPC %type);
+		echo("\c2[Support_Preferences] Invalid pref type: " @ %type);
 		return;
 	}
 
@@ -119,20 +148,32 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 		%group = new ScriptGroup(BlocklandPrefGroup) {
 			class = "PreferenceGroup";
 			title = BLP_alNum(%addon);
+			file = %filename;
 			legacy = %legacy;
 			category = %addon;
 			icon = $Pref::BlPrefs::iconDefault;
-		};
+		}; 
 	} else {
 		%group = (%groupName).getID();
 	}
+	
+	if(strpos($BLPrefs::PrefGroups, %groupName) == -1) {
+		$BLPrefs::PrefGroups = trim($BLPrefs::PrefGroups SPC %groupName);
+	}
+	
+	%find = findBLPref(%variable);
+	
+	if(%find != -1) {
+		setGlobalByName(getWord(%find, 0), getWord(%find, 1));
+	}
 
-	if(%legacy)
+	if(%legacy) {
 		%group.icon = "bricks";
+	}
 
 	for(%i=0;%i<%group.getCount();%i++) {
 		if(%variable $= %group.getObject(%i).variable) {
-			echo("\c4" @ %variable SPC "has already been registered, skipping...");
+			// echo("\c2[Support_Preferences] " @ %variable @ " has already been registered, skipping...");
 			return;
 		}
 	}
@@ -142,6 +183,7 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 		class = "Preference";
 		category = %addon;
 		title = %title;
+		file = %filename;
 		defaultValue = %default;
 		variable = %variable;
 		type = %type;
@@ -339,17 +381,22 @@ function registerPref(%addon, %dev, %title, %type, %variable, %default, %params,
 	}
 	
 	%blacklist = "$Pref::BLPrefs::AllowedRank $Pref::Server::Name $Pref::Server::WelcomeMessage $Pref::Server::MaxPlayers $Pref::Server::Password $Pref::Server::AdminPassword $Pref::Server::SuperAdminPassword $Pref::Server::ETardFilter $Pref::Server::ETardList $Pref::Server::AutoAdminList $Pref::Server::AutoSuperAdminList $Pref::Server::FallingDamage $Pref::Server::MaxBricksPerSecond $Pref::Server::RandomBrickColor $Pref::Server::TooFarDistance $Pref::Server::WrenchEventsAdminOnly";
-	for(%i = 0; %i < getWordCount(%blacklist); %i++)
-		if(%variable $= getWord(%blacklist, %i))
+	for(%i = 0; %i < getWordCount(%blacklist); %i++) {
+		if(%variable $= getWord(%blacklist, %i)) {
 			return %pref;
+		}
+	}
 	
 	%newVariable = true;
-	for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++)
-		if($BLPrefs::Pref[%i] $= %variable)
+	for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++) {
+		if($BLPrefs::Pref[%i] $= %variable) {
 			%newVariable = false;
+		}
+	}
 	
-	if(%newVariable)
+	if(%newVariable) {
 		$BLPrefs::Pref[$BLPrefs::PrefCount++] = %variable;
+	}
 	
 	return %pref;
 }
@@ -369,6 +416,31 @@ function registerPrefGroupIcon(%addon, %icon) {
 	}
 
 	%group.icon = %icon; // change icon with this function, so they're per category only now
+}
+
+function findBLPref(%variable) {
+	%fo = new FileObject();
+	%fo.openForRead($BLPrefs::File);
+	while(!%fo.isEOF()){
+		%line = %fo.readLine();
+		if(getWord(%line, 0) $= %variable) {
+			%pref = %line;
+			break;
+		}
+	}
+	%fo.close();
+	%fo.delete();
+	
+	if(%pref $= "") {
+		return -1;
+	}
+	
+	%var = getWord(%pref, 0);
+	%val = getWord(%pref, 2);
+	
+	%val = getSubStr(%val, 1, strLen(%val) - 3);
+	
+	return %var SPC %val;
 }
 
 function BlocklandPrefSO::onAdd(%obj)
@@ -535,42 +607,78 @@ function BlocklandPrefGroup::onAdd(%this) {
 if(!$BLPrefs::AddedServerSettings) {
 	%file = findFirstFile("./server/prefs/*.cs");
 
-  while(%file !$= "")	{
-  	exec(%file);
-	  %file = findNextFile("./server/prefs/*.cs");
+	while(%file !$= "")	{
+		exec(%file);
+		%file = findNextFile("./server/prefs/*.cs");
 	}
 }
 
 function loadBLPreferences() {
-	if($BLPrefs::Init)
-		return;
-	
-	%fo = new FileObject();
-	%fo.openForRead("config/server/BLPrefs/prefs.cs");
-	while(!%fo.isEOF()) {
-		%variable = getWord(%fo.readLine(), 0);
+	if(isFile($BLPrefs::File)) {
+		// echo("\c5[Support_Preferences] Loading BL Preferences...");
 		
-		%newVariable = true;
+		if(!isFile(%backup = "config/server/BLPrefs/prefs.backup")) {
+			echo("\c2[Support_Preferences] Backing up preferences file...");
+			fileCopy($BLPrefs::File, %backup);
+		}
 		
-		for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++)
-			if($BLPrefs::Pref[%i] $= %variable)
-				%newVariable = false;
+		// load all preferences from file and save them so they aren't deleted if their respective addon is disabled
+		%fo = new FileObject();
+		%fo.openForRead($BLPrefs::File);
+		while(!%fo.isEOF()) {
+			%variable = getWord(%fo.readLine(), 0);
+			
+			%newVariable = true;
+			
+			for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++) {
+				if($BLPrefs::Pref[%i] $= %variable) {
+					%newVariable = false;
+				}
+			}
+			
+			if(%newVariable) {
+				$BLPrefs::Pref[$BLPrefs::PrefCount++] = %variable;
+			}
+		}
+		%fo.close();
+		%fo.delete();
 		
-		if(%newVariable)
-			$BLPrefs::Pref[$BLPrefs::PrefCount++] = %variable;
+		exec($BLPrefs::File);
+		
+		// update preferences to all allowed clients with the pref system
+		%fo = new FileObject();
+		%fo.openForRead($BLPrefs::File);
+		while(!%fo.isEOF()) {
+			%pref = getWord(%fo.readLine(), 0);
+			
+			for(%i = 0; %i < ClientGroup.getCount(); %i++) {
+				%client = ClientGroup.getObject(%i);
+				
+				if(%client.hasPrefSystem && %client.BLP_isAllowedUse()) {
+					commandToClient(%client, 'updateBLPref', %pref, getGlobalByName(%pref));
+				}
+			}
+		}
+		%fo.close();
+		%fo.delete();
 	}
-	%fo.close();
-	%fo.delete();
 }
 
 loadBLPreferences();
 
 function saveBLPreferences() {
-	if(!$BLPrefs::serverLoadedPrefs)
+	if(!$BLPrefs::Init || !$BLPrefs::serverLoadedPrefs) {
 		return;
+	}
+	
+	if($BLPrefs::Pref[0] $= "") {
+		return;
+	}
+	
+	// echo("\c5[Support_Preferences] Saving BL Preferences...");
 	
 	%fo = new FileObject();
-	%fo.openForWrite("config/server/BLPrefs/prefs.cs");
+	%fo.openForWrite($BLPrefs::File);
 	for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++) {
 		%variable = $BLPrefs::Pref[%i];
 		%fo.writeLine(%variable @ " = \"" @ getGlobalByName(%variable) @ "\";"); // export(); doesn't return anything :(
@@ -582,27 +690,10 @@ function saveBLPreferences() {
 }
 
 package BLPrefSaveLoadPackage {
-	function GameConnection::autoAdminCheck(%client) {
-		parent::autoAdminCheck(%client);
-		
-		if(isFile(%blprefs = "config/server/BLPrefs/prefs.cs")) {
-			if(!$BLPrefs::serverLoadedPrefs) {
-				exec(%blprefs);
-				
-				if(%client.hasPrefSystem && %client.isAdmin) {
-					%fo = new FileObject();
-					%fo.openForRead(%blprefs);
-					while(!%fo.isEOF()) {
-						%pref = getWord(%fo.readLine(), 0);
-						commandToClient(%client, 'updateBLPref', %pref, getGlobalByName(%pref));
-					}
-					%fo.close();
-					%fo.delete();
-				}
-			}
-		}
-		
+	function onServerCreated() {
 		$BLPrefs::serverLoadedPrefs = true;
+		
+		parent::onServerCreated();
 	}
 	
 	function onServerDestroyed() {
