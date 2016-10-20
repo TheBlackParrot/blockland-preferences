@@ -681,6 +681,11 @@ function saveBLPreferences() {
 	%fo.openForWrite($BLPrefs::File);
 	for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++) {
 		%variable = $BLPrefs::Pref[%i];
+		
+		if(%variable $= "") {
+			continue;
+		}
+		
 		%fo.writeLine(%variable @ " = \"" @ getGlobalByName(%variable) @ "\";"); // export(); doesn't return anything :(
 	}
 	%fo.close();

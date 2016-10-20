@@ -60,9 +60,7 @@ package BLPrefCompatibilityPackage {
 	function ServerSettingsGui::onWake(%this) {
 		parent::onWake(%this);
 		
-		%crc = "-1587284330";
-		
-		if(getFileCRC("Add-Ons/System_ReturnToBlockland/server.cs") $= %crc) {
+		if(getFileCRC("Add-Ons/System_ReturnToBlockland/server.cs") == -1587284330) {
 			$ServerSettingsGui::UseRTB = false;
 			ServerSettingsGui_RTBLabel.setVisible(false);
 			ServerSettingsGui_UseRTB.setVisible(false);
