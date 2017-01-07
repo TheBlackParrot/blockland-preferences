@@ -20,26 +20,30 @@ function registerServerSettingPrefs() {
 	registerPref(%cat, "Gameplay", "Wrench events are admin only?", "boolean", "$Pref::Server::WrenchEventsAdminOnly", "Support_Preferences", $Pref::Server::WrenchEventsAdminOnly, "", "updateServerSetting", 0);
 
 	registerPrefGroupIcon(%cat, %icon);
-	
+
 	// as an example later on with colors, allow all player shapeNameColors to be set
 
 	$BLPrefs::AddedServerSettings = true;
 }
 registerServerSettingPrefs();
 
+function pushServerName() {
+  commandToAll('NewPlayerListGui_UpdateWindowTitle', $Pref::Server::Name, $Pref::Server::MaxPlayers);
+}
+
 function updateServerSetting(%value, %client, %prefSO) {
 	%title = %prefSO.title;
 
 	if(%title $= "Server Name" || %title $= "Maximum Players" || %title $= "Server Password") {
 		webcom_postserver();
-		
-		for(%i=0; %i< ClientGroup.getCount(); %i++)
-		{
+		pushServerName();
+
+		for(%i = 0; %i< ClientGroup.getCount(); %i++) {
 			%cl = ClientGroup.getObject(%i);
 			%cl.sendPlayerListUpdate();
 		}
 	}
-	
+
 	// headachey ones:
 	$Server::Name = $Pref::Server::Name;
 	$Server::WelcomeMessage = $Pref::Server::WelcomeMessage;
@@ -59,27 +63,27 @@ function autoAdminsChanged(%value, %client, %prefSO) {
 	for(%i=0;%i<ClientGroup.getCount();%i++)
 	{
 		%cl = ClientGroup.getObject(%i);
-		
+
 		%status = %cl.checkAdminStatus();
 
 		if(%status $= 2)
 		{
 			 if(%cl.isSuperAdmin)
 				continue;
-			 
+
 			 %cl.isAdmin = 1;
 			 %cl.isSuperAdmin = 1;
 			 %cl.sendPlayerListUpdate();
 			 commandtoclient(%cl,'setAdminLevel',2);
 			 messageAll('MsgAdminForce','\c2%1 has become Super Admin (Auto)', %cl.getPlayerName());
-		
+
 			 RTBSC_SendPrefList(%client);
 		}
 		else if(%status == 1)
 		{
 			 if(%cl.isAdmin)
 				continue;
-			 
+
 			 %cl.isAdmin = 1;
 			 %cl.isSuperAdmin = 0;
 			 %cl.sendPlayerListUpdate();
@@ -90,7 +94,7 @@ function autoAdminsChanged(%value, %client, %prefSO) {
 		{
 			 if(!%cl.isAdmin)
 				continue;
-			 
+
 			 %cl.isAdmin = 0;
 			 %cl.isSuperAdmin = 0;
 			 %cl.sendPlayerListUpdate();
