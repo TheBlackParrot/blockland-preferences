@@ -2,12 +2,15 @@
 // This is both an example and unit test
 // Goal for Prefs v2.0
 
+//registerPreferenceAddon(%addon, %title, %icon);
+registerPreferenceAddon("Support_Preferences", "Prefs", "gear");
+
 new ScriptObject(MyCoolPref) {
   class          = "Preference"; //don't change this one
 
   addon          = "Support_Preferences"; //add-on filename
   category       = "General";
-  name           = "Can use";
+  title          = "Can use";
 
   type           = "dropdown";
   params         = "Host 3 Super_Admin 2 Admin 1"; //list based parameters
