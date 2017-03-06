@@ -20,7 +20,7 @@ if(!isObject(PreferenceContainerGroup)) {
 
 $Pref::BLPrefs::ServerDebug = true;
 $Pref::BLPrefs::iconDefault = "wrench";
-$BLPrefs::Version = "1.2.1";
+$BLPrefs::Version = "2.0.0-alpha.0+indev";
 $BLPrefs::File = "config/server/BLPrefs/prefs.cs";
 
 if($Pref::BLPrefs::AllowedRank $= "") {

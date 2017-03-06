@@ -1,28 +1,36 @@
 function GameConnection::checkAdminStatus(%client) {
 	%bl_id = %client.getBLID();
-	
+
 	if(%bl_id == getNumKeyId() || %bl_id == 999999) {
 		return 2; // host
 	}
-	
+
 	// search super admin list
-	for(%i = 0; %i < getWordCount($Pref::Server::AutoSuperAdminList); %i++) {
-		%id = getWord($Pref::Server::AutoSuperAdminList, %i);
-		
-		if(%id == %bl_id) {
-			return 2; // super admin
+	if(%client.isSuperAdmin) {
+		return 2;
+	} else {
+		for(%i = 0; %i < getWordCount($Pref::Server::AutoSuperAdminList); %i++) {
+			%id = getWord($Pref::Server::AutoSuperAdminList, %i);
+
+			if(%id == %bl_id) {
+				return 2; // super admin
+			}
 		}
 	}
-	
+
 	// search admin list
-	for(%i = 0; %i < getWordCount($Pref::Server::AutoAdminList); %i++) {
-		%id = getWord($Pref::Server::AutoAdminList, %i);
-		
-		if(%id == %bl_id) {
-			return 1; // admin
+	if(%client.isAdmin) {
+		return 1;
+	} else {
+		for(%i = 0; %i < getWordCount($Pref::Server::AutoAdminList); %i++) {
+			%id = getWord($Pref::Server::AutoAdminList, %i);
+
+			if(%id == %bl_id) {
+				return 1; // admin
+			}
 		}
 	}
-	
+
 	// not found anywhere, so...
 	return 0; // pleb
 }
