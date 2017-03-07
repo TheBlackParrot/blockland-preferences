@@ -2,13 +2,13 @@
 // This is both an example and unit test
 // Goal for Prefs v2.0
 
-//registerPreferenceAddon(%addon, %title, %icon);
-registerPreferenceAddon("Support_Preferences", "Prefs", "gear");
+//registerPreferenceAddon(%addon, %title, %icon);My
+registerPreferenceAddon("System_BlocklandGlass", "Prefs", "gear");
 
-new ScriptObject(MyCoolPref) {
-  class          = "Preference"; //don't change this one
+new ScriptObject(Preference) {
+  className      = "MyCoolPref"; //namespace
 
-  addon          = "Support_Preferences"; //add-on filename
+  addon          = "System_BlocklandGlass"; //add-on filename
   category       = "General";
   title          = "Can use";
 
@@ -33,6 +33,7 @@ new ScriptObject(MyCoolPref) {
 function MyCoolPref::onUpdate(%this, %val) {
   //realUpdateCallback should have already been called by now,
   // handled by the Preference generic
+  echo("MyCoolPref::onUpdate");
 
   if($Test::Pref $= %val) {
     echo("Passed update callback test");
@@ -42,7 +43,7 @@ function MyCoolPref::onUpdate(%this, %val) {
 }
 
 function MyCoolPref::onLoad(%this, %val) {
-  echo("Loaded \"" @ %this.name @ "\"");
+  echo("Loaded \"" @ %this.title @ "\"");
 }
 
 function myRealUpdateCallback(%this, %val) {

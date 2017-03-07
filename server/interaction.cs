@@ -1,7 +1,13 @@
-// client communication commands are gone for now
-// will rewrite them when ready - chris
+
+// (client) -> requestPrefCategories
+// (server) -> receiveCategory
+//          -> receiveCategory
+//          -> receiveCategory
+//          -> ...
+
+
 function serverCmdRequestPrefCategories(%client) {
-	%group = PreferenceContainerGroup;
+	%group = PreferenceGroups;
 	if(!isObject(%group)) {
 		echo("\c2[Support_Preferences] " @ %client.getPlayerName() SPC "requested preferences, but the container group doesn't exist. This shouldn't be happening.");
 		return;
@@ -15,14 +21,14 @@ function serverCmdRequestPrefCategories(%client) {
 	for(%i=0;%i<%group.getCount();%i++) {
 		%row = %group.getObject(%i);
 		if($Pref::BLPrefs::ServerDebug) {
-			echo("\c5[Support_Preferences] Sending" SPC %row.category SPC "to" SPC %client.getPlayerName() @ " (BL_ID: " @ %client.getBLID() @ ")...");
+			echo("\c5[Support_Preferences] Sending" SPC %row.title SPC "to" SPC %client.getPlayerName() @ " (BL_ID: " @ %client.getBLID() @ ")...");
 		}
-		commandToClient(%client, 'ReceiveCategory', %i, %row.category, %row.icon, (%group.getCount()-1 == %i));
+		commandToClient(%client, 'ReceiveCategory', %i, %row.title, %row.icon, (%group.getCount()-1 == %i));
 	}
 }
 
 function serverCmdRequestCategoryPrefs(%client, %anID, %failsafe) {
-	%group = PreferenceContainerGroup.getObject(%anID);
+	%group = PreferenceGroups.getObject(%anID);
 
 	if(%failsafe >= 2)
 		return; // this should never happen
@@ -40,18 +46,18 @@ function serverCmdRequestCategoryPrefs(%client, %anID, %failsafe) {
 	// the groups made things SO MUCH SIMPLER
 	for(%i=0;%i<%group.getCount();%i++) {
 		%row = %group.getObject(%i);
-		commandToClient(%client, 'ReceivePref', %anID, %i, %row.title, %row.devision, %row.type, %row.params, %row.defaultValue, %row.variable, %row.getValue(), (%group.getCount()-1 == %i));
+		commandToClient(%client, 'ReceivePref', %anID, %i, %row.title, %row.category, %row.type, %row.params, %row.defaultValue, %row.variable, %row.getValue(), (%group.getCount()-1 == %i), %row.duplicate);
 	}
 }
 
-function serverCmdUpdatePref(%client, %varname, %newvalue, %announce) {
+function serverCmdUpdatePref(%client, %varname, %newvalue) {
 	//validate!
 	if(!%client.BLP_isAllowedUse()) {
 		return;
 	}
 
 	//we need to find the object
-	%pso = BlocklandPrefSO::findByVariable(%varname);
+	%pso = Preference::findByVariable(%varname);
 	if(%pso) {
 		if(getSimTime() - %client.lastChangedCat[%pso.category] >= 100) {
 			messageAll('MsgAdminForce', "\c3" @ %client.name SPC "\c6updated the \c3" @ %pso.category @ "\c6 prefs.");
@@ -91,7 +97,7 @@ function serverCmdUpdatePref(%client, %varname, %newvalue, %announce) {
 				commandToClient(%cl, 'updateBLPref', %varname, %newvalue);
 			}
 		}
-		
+
 		saveBLPreferences();
 	} else {
 		//so they tried to update a variable that doesn't exist...
