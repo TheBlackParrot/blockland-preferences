@@ -96,7 +96,7 @@ function prunePrefs() {
 
 function registerPref(%addon, %category, %title, %type, %variable, %filename, %default, %params, %callback, %legacy, %isSecret, %isHostOnly)
 {
-	warn("Depreciated Preference Registration 0 ");
+	warn("Depreciated Preference Registration");
 	// %leagacy = 1 if it's added via a compatibility wrapper
 	if(%category $= "") {
 		%category = "General";
@@ -105,13 +105,6 @@ function registerPref(%addon, %category, %title, %type, %variable, %filename, %d
 	if(%legacy) {
 		%group.icon = "bricks";
 	}
-
-	//for(%i=0;%i<%group.getCount();%i++) {
-	//	if(%variable $= %group.getObject(%i).variable) {
-	//		// echo("\c2[Support_Preferences] " @ %variable @ " has already been registered, skipping...");
-	//		return;
-	//	}
-	//}
 
 	%pref = new ScriptObject(Preference) {
 
@@ -136,21 +129,6 @@ function registerPref(%addon, %category, %title, %type, %variable, %filename, %d
 	};
 
 	return %pref;
-}
-
-function BlocklandPrefSO::findByVariable(%var) { // there's gotta be a better way to do this
-	for(%i = 0; %i < PreferenceContainerGroup.getCount(); %i++) {
-		%group = PreferenceContainerGroup.getObject(%i);
-
-		for(%j = 0; %j < %group.getCount(); %j++) {
-			%pso = %group.getObject(%j);
-			if(%pso.variable $= %var) {
-				return %pso;
-			}
-		}
-	}
-
-	return false;
 }
 
 // a wrapper to execute everything in the prefs folder
