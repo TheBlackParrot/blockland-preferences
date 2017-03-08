@@ -38,7 +38,20 @@ function loadBLPreferences() {
 		%fo = new FileObject();
 		%fo.openForRead($BLPrefs::File);
 		while(!%fo.isEOF()) {
-			%variable = getWord(%fo.readLine(), 0);
+			%line     = %fo.readLine();
+			%variable = collapseEscape(getField(%line, 0));
+			%val      = collapseEscape(getField(%line, 1));
+
+			//call ::onLoad
+			for(%i = 0; %i < PreferenceGroup.getCount(); %i++) {
+				%p = PreferenceGroup.getObject(%i);
+				if(%p.variable $= %variable) {
+					%p.updateValue = %val;
+					%p.onLoad(%val);
+					//don't break loop, there could be multiple prefs
+					// using same variable
+				}
+			}
 
 			%newVariable = true;
 
@@ -55,24 +68,20 @@ function loadBLPreferences() {
 		%fo.close();
 		%fo.delete();
 
-		exec($BLPrefs::File);
+		//update clients with values
 
-		// update preferences to all allowed clients with the pref system
-		%fo = new FileObject();
-		%fo.openForRead($BLPrefs::File);
-		while(!%fo.isEOF()) {
-			%pref = getWord(%fo.readLine(), 0);
+		for(%i = 0; %i < PreferenceGroup.getCount(); %i++) {
+			%pref = PreferenceGroup.getObject(%i);
 
 			for(%i = 0; %i < ClientGroup.getCount(); %i++) {
 				%client = ClientGroup.getObject(%i);
 
 				if(%client.hasPrefSystem && %client.BLP_isAllowedUse()) {
-					commandToClient(%client, 'updateBLPref', %pref, getGlobalByName(%pref));
+					commandToClient(%client, 'updateBLPref', %pref.variable, getGlobalByName(%pref));
 				}
 			}
+
 		}
-		%fo.close();
-		%fo.delete();
 	}
 }
 
@@ -97,7 +106,7 @@ function saveBLPreferences() {
 			continue;
 		}
 
-		%fo.writeLine(%variable @ " = \"" @ getGlobalByName(%variable) @ "\";"); // export(); doesn't return anything :(
+		%fo.writeLine(expandEscape(%variable) TAB expandEscape(getGlobalByName(%variable)));
 	}
 	%fo.close();
 	%fo.delete();

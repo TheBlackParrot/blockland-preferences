@@ -73,9 +73,13 @@ function Preference::onAdd(%this) {
     %this.duplicate = true;
   }
 
-  %group.add(%this);
-  PreferenceGroup.add(%this);
+
+  %this.id = PreferenceGroup.getCount();
   %this.setName("");
+
+  %group.add(%this);
+
+  PreferenceGroup.add(%this);
 }
 
 function Preference::findByVariable(%varname) {
@@ -443,11 +447,14 @@ function Preference::getValue(%this) {
 function Preference::updateValue(%this, %value, %updater) {
 	// we need some way to validate the values on this end of things
 	//%updater - client that updated value.
+
 	if(isObject(%updater)) {
 		%updaterClean = %updater.getId();
 	} else {
 		%updaterClean = 0;
 	}
+
+  %value = %this.validateValue(%value);
 
 	// when storing datablocks, use their NAME.
 	if(%this.type $= "datablock")
@@ -456,7 +463,10 @@ function Preference::updateValue(%this, %value, %updater) {
 		setGlobalByName(%this.variable, %value);
 	}
 
+  %this.value = %value;
+
 	%this.onUpdate(%value, %updater);
+  return true;
 }
 
 function Preference::validateValue(%this, %value) {

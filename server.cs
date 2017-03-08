@@ -96,7 +96,7 @@ function prunePrefs() {
 
 function registerPref(%addon, %category, %title, %type, %variable, %filename, %default, %params, %callback, %legacy, %isSecret, %isHostOnly)
 {
-	warn("Depreciated Preference registration");
+	warn("Depreciated Preference Registration 0 ");
 	// %leagacy = 1 if it's added via a compatibility wrapper
 	if(%category $= "") {
 		%category = "General";

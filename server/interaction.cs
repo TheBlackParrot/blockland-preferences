@@ -17,8 +17,7 @@ function serverCmdRequestPrefCategories(%client) {
 		return;
 	}
 
-	// the groups made things SO MUCH SIMPLER
-	for(%i=0;%i<%group.getCount();%i++) {
+	for(%i = 0; %i < %group.getCount(); %i++) {
 		%row = %group.getObject(%i);
 		if($Pref::BLPrefs::ServerDebug) {
 			echo("\c5[Support_Preferences] Sending" SPC %row.title SPC "to" SPC %client.getPlayerName() @ " (BL_ID: " @ %client.getBLID() @ ")...");
@@ -27,8 +26,8 @@ function serverCmdRequestPrefCategories(%client) {
 	}
 }
 
-function serverCmdRequestCategoryPrefs(%client, %anID, %failsafe) {
-	%group = PreferenceGroups.getObject(%anID);
+function serverCmdRequestCategoryPrefs(%client, %catId, %failsafe) {
+	%group = PreferenceGroups.getObject(%catId);
 
 	if(%failsafe >= 2)
 		return; // this should never happen
@@ -44,20 +43,25 @@ function serverCmdRequestCategoryPrefs(%client, %anID, %failsafe) {
 	}
 
 	// the groups made things SO MUCH SIMPLER
-	for(%i=0;%i<%group.getCount();%i++) {
+	for(%i = 0; %i < %group.getCount(); %i++) {
 		%row = %group.getObject(%i);
-		commandToClient(%client, 'ReceivePref', %anID, %i, %row.title, %row.category, %row.type, %row.params, %row.defaultValue, %row.variable, %row.getValue(), (%group.getCount()-1 == %i), %row.duplicate);
+		commandToClient(%client, 'ReceivePref', %catId, %row.id, %row.title, %row.category, %row.type, %row.params, %row.defaultValue, %row.variable, %row.getValue(), (%group.getCount()-1 == %i), %row.duplicate);
 	}
 }
 
-function serverCmdUpdatePref(%client, %varname, %newvalue) {
-	//validate!
+//this should be using id's too
+function serverCmdUpdatePref(%client, %id, %newvalue) {
 	if(!%client.BLP_isAllowedUse()) {
 		return;
 	}
 
-	//we need to find the object
-	%pso = Preference::findByVariable(%varname);
+	//backwards compatibility
+	if(%client.legacyPrefs) {
+		%pso = Preference::findByVariable(%id);
+	} else {
+		%pso = Preference.getObject(%id);
+	}
+
 	if(%pso) {
 		if(getSimTime() - %client.lastChangedCat[%pso.category] >= 100) {
 			messageAll('MsgAdminForce', "\c3" @ %client.name SPC "\c6updated the \c3" @ %pso.category @ "\c6 prefs.");
@@ -71,11 +75,12 @@ function serverCmdUpdatePref(%client, %varname, %newvalue) {
 			}
 		}
 
-		%newvalue = %pso.validateValue(%newvalue);
+		//update value now validates it
 		%pso.updateValue(%newvalue, %client);
+		%newValue = %pso.getValue();
 
 		if($Pref::BLPrefs::ServerDebug) {
-			echo("\c4[Support_Preferences] " @ %client.name @ " (BL_ID: " @ %client.getBLID() @ ") set " @ %varname @ " to " @ %newvalue);
+			echo("\c4[Support_Preferences] " @ %client.name @ " (BL_ID: " @ %client.getBLID() @ ") set " @ %pso.variable @ " to " @ %newvalue);
 		}
 
 		if(%announce) {
@@ -94,7 +99,8 @@ function serverCmdUpdatePref(%client, %varname, %newvalue) {
 		for(%i = 0; %i < ClientGroup.getCount(); %i++) {
 			%cl = ClientGroup.getObject(%i);
 			if(%cl.hasPrefSystem && %cl.BLP_isAllowedUse()) {
-				commandToClient(%cl, 'updateBLPref', %varname, %newvalue);
+				//commandToClient(%cl, 'updateBLPref', %varname, %newvalue);
+				commandToClient(%cl, 'updatePref', %pso.id, %newValue);
 			}
 		}
 
