@@ -37,8 +37,8 @@ if(!isObject(PreferenceGroup)) {
 	new SimSet(PreferenceGroup);
 }
 
-if(!isObject(PreferenceGroups)) {
-	new SimSet(PreferenceGroups);
+if(!isObject(PreferenceAddonGroup)) {
+	new SimSet(PreferenceAddonGroup);
 }
 
 $Pref::BLPrefs::ServerDebug = true;
@@ -56,7 +56,7 @@ if(!$BLPrefs::Init) {
 }
 
 exec("./class/preference.cs");
-exec("./class/preferenceGroup.cs");
+exec("./class/preferenceAddon.cs");
 
 exec("./support/admin.cs");
 exec("./support/lesseval.cs");
@@ -65,8 +65,10 @@ exec("./server/functions.cs");
 exec("./server/compatibility.cs");
 exec("./server/handshake.cs");
 exec("./server/interaction.cs");
-exec("./persistence.cs");
+exec("./server/persistence.cs");
 exec("./server/userdata.cs");
+
+exec("./rtb/puppet.cs");
 
 function prunePrefs() {
 	%groups = "";

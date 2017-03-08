@@ -4,7 +4,7 @@
 // Creation
 //================================================================
 
-// PreferenceGroup -> Preference
+// PreferenceAddon -> Preference
 
 function Preference::onAdd(%this) {
   if(%this.initialized)
@@ -32,7 +32,7 @@ function Preference::onAdd(%this) {
   // group
   %groupName = BLP_alNum(%this.addon) @ "Prefs";
 	if(!isObject(%groupName)) {
-		%group = new ScriptGroup(PreferenceGroup) {
+		%group = new ScriptGroup(PreferenceAddon) {
 			name = %groupName;
 			title = BLP_alNum(%this.addon);
 			file = %this.addon;

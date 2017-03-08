@@ -293,12 +293,19 @@ package SupportRTBPrefs {
         RTBSC_SendPrefValues(%cl);
       }
     }
+
+    return parent::onUpdate(%this, %val, %client);
+  }
+
+  function serverCmdSAD(%client,%pass) {
+     Parent::serverCmdSAD(%client,%pass);
+     RTBSC_SendPrefList(%client);
   }
 
   function GameConnection::autoAdminCheck(%this) {
     %auto = Parent::autoAdminCheck(%this);
     if(%this.hasRTB) {
-      commandtoclient(%this,'sendRTBVersion', "4.02"); //lets pretend
+      commandtoclient(%this, 'sendRTBVersion', "4.02"); //lets pretend
       RTBSC_SendPrefList(%this);
     }
     return %auto;

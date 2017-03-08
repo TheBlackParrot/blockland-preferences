@@ -7,7 +7,7 @@
 
 
 function serverCmdRequestPrefCategories(%client) {
-	%group = PreferenceGroups;
+	%group = PreferenceAddonGroup;
 	if(!isObject(%group)) {
 		echo("\c2[Support_Preferences] " @ %client.getPlayerName() SPC "requested preferences, but the container group doesn't exist. This shouldn't be happening.");
 		return;
@@ -27,7 +27,7 @@ function serverCmdRequestPrefCategories(%client) {
 }
 
 function serverCmdRequestCategoryPrefs(%client, %catId, %failsafe) {
-	%group = PreferenceGroups.getObject(%catId);
+	%group = PreferenceAddonGroup.getObject(%catId);
 
 	if(%failsafe >= 2)
 		return; // this should never happen
