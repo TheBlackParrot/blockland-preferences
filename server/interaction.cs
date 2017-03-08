@@ -27,6 +27,10 @@ function serverCmdRequestPrefCategories(%client) {
 }
 
 function serverCmdRequestCategoryPrefs(%client, %catId, %failsafe) {
+	if(!%client.BLP_isAllowedUse()) {
+		return;
+	}
+
 	%group = PreferenceAddonGroup.getObject(%catId);
 
 	if(%failsafe >= 2)
@@ -38,11 +42,6 @@ function serverCmdRequestCategoryPrefs(%client, %catId, %failsafe) {
 		return;
 	}
 
-	if(!%client.BLP_isAllowedUse()) {
-		return;
-	}
-
-	// the groups made things SO MUCH SIMPLER
 	for(%i = 0; %i < %group.getCount(); %i++) {
 		%row = %group.getObject(%i);
 		commandToClient(%client, 'ReceivePref', %catId, %row.id, %row.title, %row.category, %row.type, %row.params, %row.defaultValue, %row.variable, %row.getValue(), (%group.getCount()-1 == %i), %row.duplicate);
@@ -50,7 +49,7 @@ function serverCmdRequestCategoryPrefs(%client, %catId, %failsafe) {
 }
 
 //this should be using id's too
-function serverCmdUpdatePref(%client, %id, %newvalue) {
+function serverCmdUpdatePref(%client, %id, %newValue) {
 	if(!%client.BLP_isAllowedUse()) {
 		return;
 	}
@@ -76,18 +75,18 @@ function serverCmdUpdatePref(%client, %id, %newvalue) {
 		}
 
 		//update value now validates it
-		%pso.updateValue(%newvalue, %client);
+		%pso.updateValue(%newValue, %client);
 		%newValue = %pso.getValue();
 
 		if($Pref::BLPrefs::ServerDebug) {
-			echo("\c4[Support_Preferences] " @ %client.name @ " (BL_ID: " @ %client.getBLID() @ ") set " @ %pso.variable @ " to " @ %newvalue);
+			echo("\c4[Support_Preferences] " @ %client.name @ " (BL_ID: " @ %client.getBLID() @ ") set " @ %pso.variable @ " to " @ %newValue);
 		}
 
 		if(%announce) {
 			if(%pso.type $= "dropdown" || %pso.type $= "datablock") {
-				%displayValue = %pso.valueName[%newvalue];
+				%displayValue = %pso.valueName[%newValue];
 			} else {
-				%displayValue = expandEscape(%newvalue);
+				%displayValue = expandEscape(%newValue);
 			}
 
 			if(!%pso.secret)
@@ -99,7 +98,7 @@ function serverCmdUpdatePref(%client, %id, %newvalue) {
 		for(%i = 0; %i < ClientGroup.getCount(); %i++) {
 			%cl = ClientGroup.getObject(%i);
 			if(%cl.hasPrefSystem && %cl.BLP_isAllowedUse()) {
-				//commandToClient(%cl, 'updateBLPref', %varname, %newvalue);
+				//commandToClient(%cl, 'updateBLPref', %varname, %newValue);
 				commandToClient(%cl, 'updatePref', %pso.id, %newValue);
 			}
 		}

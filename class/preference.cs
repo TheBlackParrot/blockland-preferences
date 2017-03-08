@@ -4,7 +4,28 @@
 // Creation
 //================================================================
 
-// PreferenceAddon -> Preference
+function registerServerSetting(%cat, %title, %type, %variable, %addon, %default, %params, %callback, %legacy, %isSecret, %isHostOnly) {
+  new ScriptObject(Preference) {
+    className     = "ServerSettingPref";
+
+    addon         = -1;
+    serverSetting = true;
+    category      = %cat;
+    title         = %title;
+
+    type          = %type;
+    params        = %params;
+
+    variable      = %variable;
+
+    defaultValue  = %default;
+
+    hostOnly      = %isHostOnly;
+    secret        = %isSecret;
+
+    noSave        = true;
+  };
+}
 
 function Preference::onAdd(%this) {
   if(%this.initialized)
@@ -29,48 +50,55 @@ function Preference::onAdd(%this) {
     return;
   }
 
-  // group
-  %groupName = BLP_alNum(%this.addon) @ "Prefs";
-	if(!isObject(%groupName)) {
-		%group = new ScriptGroup(PreferenceAddon) {
-			name = %groupName;
-			title = BLP_alNum(%this.addon);
-			file = %this.addon;
-			legacy = false;
-			icon = $Pref::BlPrefs::iconDefault;
-		};
-	} else {
-		%group = (%groupName).getID();
-	}
+  if(!%this.serverSetting) {
+    // group
+    %groupName = BLP_alNum(%this.addon) @ "Prefs";
+  	if(!isObject(%groupName)) {
+  		%group = new ScriptGroup(PreferenceAddon) {
+  			name = %groupName;
+  			title = BLP_alNum(%this.addon);
+  			file = %this.addon;
+  			legacy = false;
+  			icon = $Pref::BlPrefs::iconDefault;
+  		};
+  	} else {
+  		%group = (%groupName).getID();
+  	}
 
-  if(%this.loadNow) {
-    %this.forceLoad();
-  }
+    if(%this.loadNow) {
+      %this.forceLoad();
+    }
 
-  //variable indexing
+    %variable = %this.variable;
+    %newVariable = true;
+  	for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++) {
+  		if($BLPrefs::Pref[%i] $= %variable) {
+  			%newVariable = false;
+  		}
+  	}
 
-  //%blacklist = "$Pref::BLPrefs::AllowedRank $Pref::Server::Name $Pref::Server::WelcomeMessage $Pref::Server::MaxPlayers $Pref::Server::Password $Pref::Server::AdminPassword $Pref::Server::SuperAdminPassword $Pref::Server::ETardFilter $Pref::Server::ETardList $Pref::Server::AutoAdminList $Pref::Server::AutoSuperAdminList $Pref::Server::FallingDamage $Pref::Server::MaxBricksPerSecond $Pref::Server::RandomBrickColor $Pref::Server::TooFarDistance $Pref::Server::WrenchEventsAdminOnly";
-	//for(%i = 0; %i < getWordCount(%blacklist); %i++) {
-	//	if(%variable $= getWord(%blacklist, %i)) {
-	//		return %pref;
-	//	}
-	//}
+  	if(%newVariable) {
+  		$BLPrefs::Pref[$BLPrefs::PrefCount++] = %variable;
+  	}
 
-  %variable = %this.variable;
-  %newVariable = true;
-	for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++) {
-		if($BLPrefs::Pref[%i] $= %variable) {
-			%newVariable = false;
-		}
-	}
-
-	if(%newVariable) {
-		$BLPrefs::Pref[$BLPrefs::PrefCount++] = %variable;
-	}
-
-  if(!%newVariable) {
-    warn("Variable \"" @ %variable @  "\" is already associated with another preference!");
-    %this.duplicate = true;
+    if(!%newVariable) {
+      warn("Variable \"" @ %variable @  "\" is already associated with another preference!");
+      %this.duplicate = true;
+    }
+  } else {
+    //server setting
+    %groupName = "ServerSettingPrefs";
+  	if(!isObject(%groupName)) {
+  		%group = new ScriptGroup(PreferenceAddon) {
+  			name = %groupName;
+  			title = "Server Settings";
+  			file = -1;
+  			legacy = false;
+  			icon = "blLogo";
+  		};
+  	} else {
+  		%group = (%groupName).getID();
+  	}
   }
 
 
@@ -159,13 +187,13 @@ function Preference::_validateParameters(%this) {
   if(%this.addon $= "") {
     error(%this.getName() @ " pref: No Add-On Specified!");
     return false;
-  } else if(%this.addon !$= "Blockland") {
-    %path = "Add-Ons/" @ %this.addon @ "/";
-    if(!isFile(%path @ "server.cs")) {
-      error(%this.className @ " pref: Invalid Add-On Path! (No file " @ %path @  "server.cs)");
-      return false;
-    }
-  }
+  }// else if(%this.addon !$= -1) {
+  //  %path = "Add-Ons/" @ %this.addon @ "/";
+  //  if(!isFile(%path @ "server.cs")) {
+  //    error(%this.className @ " pref: Invalid Add-On Path! (No file " @ %path @  "server.cs)");
+  //    return false;
+  //  }
+  //}
 
   if(trim(%this.category) $= "")
     %this.category = "General";

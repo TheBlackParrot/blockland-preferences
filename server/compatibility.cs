@@ -16,11 +16,31 @@ if(!isFile("Add-Ons/System_ReturnToBlockland/server.cs")) { // the addon does no
 	%fo.delete();
 }
 
+function rtbLegacyPref::onUpdate(%this, %val, %cl) {
+	if(%this.rtbCallback !$= "") {
+		call(%this.rtbCallback, %this.lastVal, %val);
+	}
+
+	%this.lastVal = %val;
+}
+
+function rtbLegacyPref::onLoad(%this, %val) {
+	%this.lastVal = %val;
+}
+
+function rtbLegacyPref::onDefault(%this, %val) {
+	if(%this.rtbCallback !$= "") {
+		call(%this.rtbCallback, %this.lastVal, %val);
+	}
+
+	%this.lastVal = %val;
+}
+
 package BLPrefCompatibilityPackage {
 	function RTB_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback) {
-		if(isFunction("RTB_registerPref")) {
-			parent::RTB_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
-		}
+		//if(isFunction("RTB_registerPref")) {
+		//	parent::RTB_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
+		//}
 
 		%type = getWord(%params, 0);
 
@@ -42,24 +62,42 @@ package BLPrefCompatibilityPackage {
 			%sub = "General";
 		}
 
-		// type checks moved to server.cs, considering them shorthand
-		// some prefs have "$", some don't
-		registerPref(%cat, %sub, %name, %type, "$" @ strReplace(%variable, "$", ""), %filename, %default, getWords(%params, 1), %callback, 1);
+		%pref = new ScriptObject(Preference) {
+			className       = "rtbLegacyPref";
+
+			addon           = %cat;
+			category        = %sub;
+			title           = %name;
+
+			type            = %type;
+			params          = getWords(%params, 1);
+
+			variable        = %variable;
+			defaultValue    = %default;
+
+			rtbCallback     = %callback;
+
+			hostOnly        = %hostOnly;
+			requiresRestart = %requiresRestart;
+		};
+
+		%group = %pref.getGroup();
+		%group.legacy = true;
+		%group.icon   = "bricks";
 	}
 
-	// because oRBs is the same thing at this point -_-
-	// so much for "innovation", amirite?
 	function oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback) {
+		warn("oRBs is bad and you should not be using it.");
 		RTB_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
 
 		if(isFunction("oRBs_registerPref")) {
 			parent::oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
 		}
 	}
-	
+
 	function ServerSettingsGui::onWake(%this) {
 		parent::onWake(%this);
-		
+
 		if(getFileCRC("Add-Ons/System_ReturnToBlockland/server.cs") == -1587284330) {
 			$ServerSettingsGui::UseRTB = false;
 			ServerSettingsGui_RTBLabel.setVisible(false);

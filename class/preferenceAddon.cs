@@ -10,6 +10,9 @@ function PreferenceAddon::onAdd(%this) {
 }
 
 function registerPreferenceAddon(%addon, %title, %icon) {
+  if(!isFile("Add-Ons/" @ %addon @ "/server.cs")) {
+    error("[Support_Preferences] Failed to register add-on \"" @ %addon @ "\" - does not exist");
+  }
   %groupName = BLP_alNum(%addon) @ "Prefs";
 	if(!isObject(%groupName)) {
 		%group = new ScriptGroup(PreferenceAddon) {

@@ -21,23 +21,32 @@ function BLP_alNum(%str) {
 }
 
 function GameConnection::BLP_isAllowedUse(%this) {
+	if(%this.getBLID() == getNumKeyID()) {
+		return true;
+	}
+
 	switch($Pref::BLPrefs::AllowedRank) {
 		case 3:
-			if(%this.getBLID() == 999999 || %this.getBLID() == getNumKeyID()) {
-				return 1;
+			if(%this.getBLID() == 999999 || %this.getBLID() == getNumKeyID() || %this.isHost) {
+				return true;
 			}
 
 		case 2:
 			if(%this.isSuperAdmin) {
-				return 1;
+				return true;
 			}
 
 		case 1:
 			if(%this.isAdmin) {
-				return 1;
+				return true;
 			}
+
+		default:
+			warn("[Support_Preferences] Allowed rank not set, setting to Super Admin");
+			$Pref::BLPrefs::AllowedRank = 2;
+			return %this.BLP_isAllowedUse;
 	}
-	return 0;
+	return false;
 }
 
 function getFirstWord(%str) {
