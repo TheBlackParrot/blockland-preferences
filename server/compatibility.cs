@@ -84,6 +84,7 @@ package BLPrefCompatibilityPackage {
 		%group = %pref.getGroup();
 		%group.legacy = true;
 		%group.icon   = "bricks";
+		%group.name   = %cat;
 	}
 
 	function oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback) {
