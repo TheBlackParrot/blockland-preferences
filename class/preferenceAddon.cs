@@ -1,12 +1,13 @@
 //PreferenceAddon class file
 
-function PreferenceAddon::onAdd(%this) {
+function PreferenceAddon::onAdd(%this, %a) {
   if(%this.initialized)
     return;
 
+  %this.initialized = true;
+
   %this.setName(%this.name);
   PreferenceAddonGroup.add(%this);
-  %this.initialized = true;
 }
 
 function registerPreferenceAddon(%addon, %title, %icon) {

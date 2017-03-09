@@ -1,5 +1,8 @@
 function registerServerSettingPrefs() {
 
+	if($BLPrefs::AddedServerSettings)
+		return;
+
 	registerServerSetting("General", "Server Name", "string", "$Pref::Server::Name", "Support_Preferences", $Pref::Server::Name, "64 1", "updateServerSetting", 0);
 	registerServerSetting("General", "Welcome Message", "string", "$Pref::Server::WelcomeMessage", "Support_Preferences", $Pref::Server::WelcomeMessage, "512 0", "updateServerSetting", 0);
 	registerServerSetting("General", "Maximum Players", "playercount", "$Pref::Server::MaxPlayers", "Support_Preferences", $Pref::Server::MaxPlayers, "1 99", "updateServerSetting", 0);
@@ -20,14 +23,21 @@ function registerServerSettingPrefs() {
 	// as an example later on with colors, allow all player shapeNameColors to be set
 
 	$BLPrefs::AddedServerSettings = true;
+	echo("done registerServerSettingPrefs");
 }
 registerServerSettingPrefs();
 
 function pushServerName() {
-  commandToAll('NewPlayerListGui_UpdateWindowTitle', $Pref::Server::Name, $Pref::Server::MaxPlayers);
+	%name = $Pref::Player::NetName;
+	if(getSubStr(%name, strlen(%name)-2, 1) $= "s")
+		%name = %name @ "'";
+	else
+		%name = %name @ "'s";
+
+  commandToAll('NewPlayerListGui_UpdateWindowTitle', %name SPC $Pref::Server::Name, $Pref::Server::MaxPlayers);
 }
 
-function updateServerSetting(%prefSO, %value, %client) {
+function ServerSettingPref::onUpdate(%prefSO, %value, %client) {
 	%title = %prefSO.title;
 
 	if(%title $= "Server Name" || %title $= "Maximum Players" || %title $= "Server Password") {
@@ -99,3 +109,4 @@ function autoAdminsChanged(%value, %client, %prefSO) {
 		}
 	}
 }
+trace(1);

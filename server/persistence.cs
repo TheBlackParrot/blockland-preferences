@@ -73,8 +73,8 @@ function loadBLPreferences() {
 		for(%i = 0; %i < PreferenceGroup.getCount(); %i++) {
 			%pref = PreferenceGroup.getObject(%i);
 
-			for(%i = 0; %i < ClientGroup.getCount(); %i++) {
-				%client = ClientGroup.getObject(%i);
+			for(%j = 0; %j < ClientGroup.getCount(); %j++) {
+				%client = ClientGroup.getObject(%j);
 
 				if(%client.hasPrefSystem && %client.BLP_isAllowedUse()) {
 					commandToClient(%client, 'updateBLPref', %pref.variable, getGlobalByName(%pref));
@@ -126,6 +126,9 @@ package BLPrefSaveLoadPackage {
 		saveBLPreferences();
 
 		$BLPrefs::serverLoadedPrefs = false;
+		$BLPrefs::PrefCount = 0;
+		PreferenceAddonGroup.deleteAll();
+		PreferenceGroup.deleteAll();
 
 		parent::onServerDestroyed();
 	}

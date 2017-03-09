@@ -58,12 +58,16 @@ function serverCmdUpdatePref(%client, %id, %newValue) {
 	if(%client.legacyPrefs) {
 		%pso = Preference::findByVariable(%id);
 	} else {
-		%pso = Preference.getObject(%id);
+		%pso = PreferenceGroup.getObject(%id);
 	}
 
 	if(%pso) {
 		if(getSimTime() - %client.lastChangedCat[%pso.category] >= 100) {
-			messageAll('MsgAdminForce', "\c3" @ %client.name SPC "\c6updated the \c3" @ %pso.category @ "\c6 prefs.");
+			if(%pso.addon $= -1) {
+				messageAll('MsgAdminForce', "\c3" @ %client.name SPC "\c6updated the \c3Server Settings\c6.");
+			} else {
+				messageAll('MsgAdminForce', "\c3" @ %client.name SPC "\c6updated the \c3" @ %pso.getGroup().title @ "\c6 prefs.");
+			}
 		}
 
 		%client.lastChangedCat[%pso.category] = getSimTime();
@@ -82,6 +86,7 @@ function serverCmdUpdatePref(%client, %id, %newValue) {
 			echo("\c4[Support_Preferences] " @ %client.name @ " (BL_ID: " @ %client.getBLID() @ ") set " @ %pso.variable @ " to " @ %newValue);
 		}
 
+		%announce = true;
 		if(%announce) {
 			if(%pso.type $= "dropdown" || %pso.type $= "datablock") {
 				%displayValue = %pso.valueName[%newValue];
