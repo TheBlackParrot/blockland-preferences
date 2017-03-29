@@ -5,7 +5,7 @@ package BLPrefServerPackage {
 			if(getField(%line, 0) $= "Prefs") {
 				%this.hasPrefSystem = 1;
 				if($Pref::BLPrefs::ServerDebug) {
-					echo("\c4[Support_Preferences]" @ %this.getPlayerName() SPC "has the pref system. (version" SPC getField(%line, 1) @ ")");
+					echo("\c4[Support_Preferences] client has the pref system. (version" SPC getField(%line, 1) @ ")");
 				}
 				break;
 			}
@@ -15,7 +15,7 @@ package BLPrefServerPackage {
 
 	function GameConnection::autoAdminCheck(%client) {
 		%aac = Parent::autoAdminCheck(%client);
-		
+
 		commandToClient(%client, 'hasPrefSystem', $BLPrefs::Version, %client.BLP_isAllowedUse());
 		return %aac;
 	}
