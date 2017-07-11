@@ -109,4 +109,3 @@ function autoAdminsChanged(%value, %client, %prefSO) {
 		}
 	}
 }
-trace(1);
