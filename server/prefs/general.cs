@@ -23,7 +23,6 @@ function registerServerSettingPrefs() {
 	// as an example later on with colors, allow all player shapeNameColors to be set
 
 	$BLPrefs::AddedServerSettings = true;
-	echo("done registerServerSettingPrefs");
 }
 registerServerSettingPrefs();
 

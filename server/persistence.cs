@@ -126,7 +126,9 @@ package BLPrefSaveLoadPackage {
 		saveBLPreferences();
 
 		$BLPrefs::serverLoadedPrefs = false;
+		$BLPrefs::AddedServerSettings = false;
 		$BLPrefs::PrefCount = 0;
+		
 		PreferenceAddonGroup.deleteAll();
 		PreferenceGroup.deleteAll();
 

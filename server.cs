@@ -22,6 +22,7 @@
 
 if($BLPrefs::didLoad && !$BLPrefs::Debug && $BLPrefs::Init) {
 	prunePrefs();
+	registerServerSettingPrefs();
 	return;
 } else if(!$BLPrefs::PreLoad) {
 	echo("\c2[Support_Preferences] Preloader NOT installed. Some prefs may not be available!");
