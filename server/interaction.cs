@@ -90,7 +90,7 @@ function serverCmdUpdatePref(%client, %id, %newValue) {
 		if(%announce) {
 			if(%pso.type $= "dropdown" || %pso.type $= "datablock") {
 				%displayValue = %pso.valueName[%newValue];
-			} else if(%pso.type $= "checkbox") {
+			} else if(%pso.type $= "checkbox" || %pso.type $= "bool") {
 				%displayValue = (%newValue ? "true" : "false");
 			} else {
 				%displayValue = expandEscape(%newValue);
