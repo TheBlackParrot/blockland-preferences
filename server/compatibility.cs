@@ -36,6 +36,10 @@ function rtbLegacyPref::onDefault(%this, %val) {
 	%this.lastVal = %val;
 }
 
+//polyfill
+if(!isFunction(oRBs_registerPref)) eval("function oRBs_registerPref() {}");
+if(!isFunction(RTB_registerPref))  eval("function RTB_registerPref()  {}");
+
 package BLPrefCompatibilityPackage {
 	function RTB_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback) {
 		//if(isFunction("RTB_registerPref")) {
