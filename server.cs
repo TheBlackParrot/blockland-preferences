@@ -21,8 +21,12 @@
 // - rgb [form] # form = hex, integer
 
 if($BLPrefs::didLoad && !$BLPrefs::Debug && $BLPrefs::Init) {
-	prunePrefs();
-	registerServerSettingPrefs();
+	if(!$Server::Dedicated) {
+		echo("[Support_Preferences] Preferences Reloading");
+		activatePackage(BLPrefCompatibilityPackage);
+		prunePrefs();
+		registerServerSettingPrefs();
+	}
 	return;
 } else if(!$BLPrefs::PreLoad) {
 	echo("\c2[Support_Preferences] Preloader NOT installed. Some prefs may not be available!");

@@ -155,6 +155,7 @@ function Preference::forceLoad(%this) {
 
 	if(!%found) {
 		//default
+    echo("Loading default for " @ %this @ " (" @ %this.defaultValue @ ")");
     %this.value = %this.defaultValue;
 		setGlobalByName(getWord(%variable, 0), %this.value);
 
@@ -165,6 +166,8 @@ function Preference::forceLoad(%this) {
 
     %this.onLoad(%val);
   }
+
+  %this._loaded = true;
 }
 
 //================================================================
