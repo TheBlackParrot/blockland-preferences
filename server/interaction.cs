@@ -49,7 +49,7 @@ function serverCmdRequestCategoryPrefs(%client, %catId, %failsafe) {
 }
 
 //this should be using id's too
-function serverCmdUpdatePref(%client, %id, %newValue) {
+function serverCmdUpdatePref(%client, %id, %newValue, %announce) {
 	if(!%client.BLP_isAllowedUse()) {
 		return;
 	}
@@ -62,7 +62,7 @@ function serverCmdUpdatePref(%client, %id, %newValue) {
 	}
 
 	if(%pso) {
-		if(getSimTime() - %client.lastChangedCat[%pso.category] >= 100) {
+		if(getSimTime() - %client.lastChangedCat[%pso.addon] >= 100) {
 			if(%pso.addon $= -1) {
 				messageAll('MsgAdminForce', "\c3" @ %client.name SPC "\c6updated the \c3Server Settings\c6.");
 			} else {
@@ -70,7 +70,7 @@ function serverCmdUpdatePref(%client, %id, %newValue) {
 			}
 		}
 
-		%client.lastChangedCat[%pso.category] = getSimTime();
+		%client.lastChangedCat[%pso.addon] = getSimTime();
 
 		if(%pso.hostOnly) {
 			if(%client.getBLID() != getNumKeyId() && %client.getBLID() != 999999) {
@@ -86,7 +86,6 @@ function serverCmdUpdatePref(%client, %id, %newValue) {
 			echo("\c4[Support_Preferences] " @ %client.name @ " (BL_ID: " @ %client.getBLID() @ ") set " @ %pso.variable @ " to " @ %newValue);
 		}
 
-		%announce = true;
 		if(%announce) {
 			if(%pso.type $= "dropdown" || %pso.type $= "datablock") {
 				%displayValue = %pso.valueName[%newValue];

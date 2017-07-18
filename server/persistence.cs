@@ -64,6 +64,8 @@ function loadBLPreferences() {
 		}
 		%fo.close();
 		%fo.delete();
+	} else {
+		echo("\c1[Support_Preferences] Defaulting Preferences");
 	}
 	BLPrefUpdateTick();
 }
@@ -95,6 +97,10 @@ function saveBLPreferences() {
 	%fo.delete();
 
 	export("$Pref::Server::*", "config/server/prefs.cs");
+
+	if(!isFile($BLPrefs::File)) {
+		echo("\c2[Support_Preferences] Failed to save preferences!");
+	}
 }
 
 function BLPrefUpdateTick() {

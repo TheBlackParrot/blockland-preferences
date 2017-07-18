@@ -54,6 +54,8 @@ package BLPrefCompatibilityPackage {
 		%addon = strReplace(%addon, ":", "" TAB "");
 		%addon = strReplace(%addon, ";", "" TAB "");
 
+		%addon = trim(%addon);
+
 		%cat = getField(%addon, 0);
 		%sub = getFields(%addon, 1);
 
@@ -69,7 +71,7 @@ package BLPrefCompatibilityPackage {
 		%pref = new ScriptObject(Preference) {
 			className       = "rtbLegacyPref";
 
-			addon           = %cat;
+			addon           = %filename;
 			category        = %sub;
 			title           = %name;
 
@@ -90,7 +92,7 @@ package BLPrefCompatibilityPackage {
 		%group = %pref.getGroup();
 		%group.legacy = true;
 		%group.icon   = "bricks";
-		%group.name   = %cat;
+		%group.title  = %addon;
 	}
 
 	function oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback) {

@@ -56,7 +56,7 @@ function Preference::onAdd(%this) {
   	if(!isObject(%groupName)) {
   		%group = new ScriptGroup(PreferenceAddon) {
   			name = %groupName;
-  			title = BLP_alNum(%this.addon);
+  			title = %this.addon;
   			file = %this.addon;
   			legacy = false;
   			icon = $Pref::BlPrefs::iconDefault;
@@ -79,7 +79,7 @@ function Preference::onAdd(%this) {
       $BLPrefs::Pref[%id]      = %variable;
       $BLPrefs::PrefCount++;
 
-			setGlobalByName(%variable, %val);
+			setGlobalByName(%variable, %this.defaultValue);
 
       %this.value = %this.defaultValue;
       %this.onDefault();

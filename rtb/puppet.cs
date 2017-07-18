@@ -238,7 +238,7 @@ function serverCmdRTB_getServerOptions(%client) {
 
 //- serverCmdRTB_defaultServerPrefs (Reverts all prefs back to their defined default values)
 function serverCmdRTB_defaultServerPrefs(%client) {
-  messageClient(%client, "Not Supported", "Resetting preferences to their default values is currently not supported.");
+  messageClient(%client, "Not Supported", "Resetting preferences to their default values is currently not supported with Support_Preferences.");
 }
 
 //- serverCmdRTB_setServerPrefs (Updates the prefs on the server with those sent from the client)
