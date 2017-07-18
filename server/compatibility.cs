@@ -83,6 +83,8 @@ package BLPrefCompatibilityPackage {
 
 			hostOnly        = %hostOnly;
 			requiresRestart = %requiresRestart;
+
+			loadNow         = false;
 		};
 
 		%group = %pref.getGroup();

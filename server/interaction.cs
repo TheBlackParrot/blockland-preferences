@@ -102,17 +102,22 @@ function serverCmdUpdatePref(%client, %id, %newValue) {
 				messageAll('', "\c6 + \c3" @ %pso.title SPC "\c6was changed.");
 		}
 
-		for(%i = 0; %i < ClientGroup.getCount(); %i++) {
-			%cl = ClientGroup.getObject(%i);
-			if(%cl.hasPrefSystem && %cl.BLP_isAllowedUse()) {
-				//commandToClient(%cl, 'updateBLPref', %varname, %newValue);
-				commandToClient(%cl, 'updatePref', %pso.id, %newValue);
-			}
-		}
+		//for(%i = 0; %i < ClientGroup.getCount(); %i++) {
+		//	%cl = ClientGroup.getObject(%i);
+		//	if(%cl.hasPrefSystem && %cl.BLP_isAllowedUse()) {
+		//		//commandToClient(%cl, 'updateBLPref', %varname, %newValue);
+		//		commandToClient(%cl, 'updatePref', %pso.id, %newValue);
+		//	}
+		//}
 
 		saveBLPreferences();
 	} else {
 		//so they tried to update a variable that doesn't exist...
 		warn("Variable \"" @ %varname @ "\" doesn't exist!");
 	}
+}
+
+function serverCmdOpenPrefs(%cl) {
+	if(%cl.BLP_isAllowedUse())
+		BLPrefCheckUpdates();
 }

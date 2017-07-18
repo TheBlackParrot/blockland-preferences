@@ -30,9 +30,12 @@ function loadBLPreferences() {
 		// echo("\c5[Support_Preferences] Loading BL Preferences...");
 
 		if(!isFile(%backup = "config/server/BLPrefs/prefs.backup")) {
-			echo("\c2[Support_Preferences] Backing up preferences file...");
+			echo("\c1[Support_Preferences] Backing up preferences file...");
 			fileCopy($BLPrefs::File, %backup);
 		}
+
+
+		echo("\c1[Support_Preferences] Loading preferences...");
 
 		// load all preferences from file and save them so they aren't deleted if their respective addon is disabled
 		%fo = new FileObject();
@@ -42,71 +45,27 @@ function loadBLPreferences() {
 			%variable = collapseEscape(getField(%line, 0));
 			%val      = collapseEscape(getField(%line, 1));
 
-			//call ::onLoad
-			for(%i = 0; %i < PreferenceGroup.getCount(); %i++) {
-				%p = PreferenceGroup.getObject(%i);
-				if(%p.variable $= %variable && !%p._loaded) {
-					%p.updateValue = %val;
-
-					setGlobalByName(%variable, %val);
-
-					%p.onLoad(%val);
-					//don't break loop, there could be multiple prefs
-					// using same variable
-					%p._loaded = true;
-				}
-			}
+			setGlobalByName(%variable, %val);
 
 			%newVariable = true;
 
-			for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++) {
+			for(%i = 0; %i < $BLPrefs::PrefCount; %i++) {
 				if($BLPrefs::Pref[%i] $= %variable) {
 					%newVariable = false;
 				}
 			}
 
 			if(%newVariable) {
-				$BLPrefs::Pref[$BLPrefs::PrefCount++] = %variable;
+				%id = $BLPrefs::PrefCount;
+				$BLPrefs::PrefValue[%id] = %val;
+				$BLPrefs::Pref[%id]      = %variable;
+				$BLPrefs::PrefCount++;
 			}
 		}
 		%fo.close();
 		%fo.delete();
 	}
-
-	for(%i = 0; %i < PreferenceGroup.getCount(); %i++) {
-		%p = PreferenceGroup.getObject(%i);
-		if(%p.className $= "ServerSettingPref")
-			continue;
-
-		if(!%p._loaded) {
-			echo("\c1Loading default value for " @ %p.variable);
-			%p.value = %p.defaultValue;
-			echo("\c1  " @ %p.value);
-			%p._loaded = true;
-
-			if(%p.variable !$= "") {
-				echo(%p.variable @ " set to " @ %p.value);
-				setGlobalByName(%p.variable, %p.value);
-			}
-
-			%p.onDefault(%p.value);
-		}
-	}
-
-	//update clients with values
-
-	for(%i = 0; %i < PreferenceGroup.getCount(); %i++) {
-		%pref = PreferenceGroup.getObject(%i);
-
-		for(%j = 0; %j < ClientGroup.getCount(); %j++) {
-			%client = ClientGroup.getObject(%j);
-
-			if(%client.hasPrefSystem && %client.BLP_isAllowedUse()) {
-				commandToClient(%client, 'updateBLPref', %pref.variable, getGlobalByName(%pref));
-			}
-		}
-
-	}
+	BLPrefUpdateTick();
 }
 
 
@@ -123,7 +82,7 @@ function saveBLPreferences() {
 
 	%fo = new FileObject();
 	%fo.openForWrite($BLPrefs::File);
-	for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++) {
+	for(%i = 0; %i < $BLPrefs::PrefCount; %i++) {
 		%variable = $BLPrefs::Pref[%i];
 
 		if(%variable $= "") {
@@ -138,10 +97,41 @@ function saveBLPreferences() {
 	export("$Pref::Server::*", "config/server/prefs.cs");
 }
 
+function BLPrefUpdateTick() {
+	cancel($BLPrefs::UpdateTick);
+
+	BLPrefCheckUpdates();
+
+	$BLPrefs::UpdateTick = schedule(1000, PreferenceGroup, BLPrefUpdateTick);
+}
+
+function BLPrefCheckUpdates() {
+	for(%i = 0; %i < PreferenceGroup.getCount(); %i++) {
+		%p = PreferenceGroup.getObject(%i);
+		if(%p.variable !$= "" && %p._loaded) {
+			%val = getGlobalByName(%p.variable);
+			if(%val !$= %p.value) {
+				echo("\c1[Support_Preferences] Detected change in " @ %p.variable);
+				echo("\c1\"" @ %p.value @ "\" to \"" @ %val @ "\"");
+
+				%p.updateValue(%val);
+
+				for(%j = 0; %j < ClientGroup.getCount(); %j++) {
+					%client = ClientGroup.getObject(%j);
+
+					if(%client.hasPrefSystem && %client.BLP_isAllowedUse()) {
+						commandToClient(%client, 'updateBLPref', %p.variable, %p.value);
+					}
+				}
+			}
+		}
+	}
+}
 
 package BLPrefSaveLoadPackage {
 	function onServerCreated() {
 		$BLPrefs::serverLoadedPrefs = true;
+		loadBLPreferences();
 
 		parent::onServerCreated();
 	}
@@ -156,7 +146,7 @@ package BLPrefSaveLoadPackage {
 		PreferenceAddonGroup.deleteAll();
 		PreferenceGroup.deleteAll();
 
-		echo("\c2[Support_Preferences] Cleaned Preferences");
+		echo("\c1[Support_Preferences] Cleaned Preferences");
 
 		parent::onServerDestroyed();
 	}
@@ -169,7 +159,6 @@ package BLPrefSaveLoadPackage {
 
   function postServerTCPObj::connect(%this, %addr) {
     parent::connect(%this, %addr);
-		loadBLPreferences();
 	}
 
 	function deactivateServerPackages() {

@@ -65,25 +65,30 @@ function Preference::onAdd(%this) {
   		%group = (%groupName).getID();
   	}
 
-    if(%this.loadNow) {
-      %this.forceLoad();
-    }
-
     %variable = %this.variable;
     %newVariable = true;
-  	for(%i = 0; %i < $BLPrefs::PrefCount + 1; %i++) {
+  	for(%i = 0; %i < $BLPrefs::PrefCount; %i++) {
   		if($BLPrefs::Pref[%i] $= %variable) {
   			%newVariable = false;
   		}
   	}
 
-  	if(%newVariable) {
-  		$BLPrefs::Pref[$BLPrefs::PrefCount++] = %variable;
-  	}
+  	if(%newVariable) { //Value was not loaded. Default
+      %id = $BLPrefs::PrefCount;
+      $BLPrefs::PrefValue[%id] = %this.defaultValue;
+      $BLPrefs::Pref[%id]      = %variable;
+      $BLPrefs::PrefCount++;
 
-    if(!%newVariable) {
-      warn("Variable \"" @ %variable @  "\" is already associated with another preference!");
-      %this.duplicate = true;
+			setGlobalByName(%variable, %val);
+
+      %this.value = %this.defaultValue;
+      %this.onDefault();
+      %this._loaded = true;
+  	} else {
+      //value was loaded, set it
+      %this.value = getGlobalByName(%variable);
+      %this.onLoad();
+      %this._loaded = true;
     }
   } else {
     //server setting
@@ -127,8 +132,6 @@ function Preference::findByVariable(%varname) {
 //================================================================
 
 function Preference::forceLoad(%this) {
-  BlocklandPrefs::checkMigrate(); //old save format
-
   %variable = %this.variable;
   %fo = new FileObject();
 	%fo.openForRead($BLPrefs::File);
@@ -136,17 +139,9 @@ function Preference::forceLoad(%this) {
 	while(!%fo.isEOF()){
 		%line = %fo.readLine();
 
-    if(%ct == 0) {
-      if(getWord(%line, 0) !$= "blprefs") {
-        error("Invalid preference file at \"" @ $BLPrefs::File @ "\"");
-        break;
-      }
-      continue;
-    }
-
 		if(getField(%line, 0) $= %variable) {
       %found = true;
-			%val = collapseEscape(%line);
+			%val = collapseEscape(getField(%line, 1));
 			break;
 		}
 	}
@@ -161,8 +156,9 @@ function Preference::forceLoad(%this) {
 
     %this.onDefault(%this.value);
 	} else {
+    echo("\c1Loaded " @ %variable @ " as " @ %val);
     %this.value = %val;
-		setGlobalByName(getWord(%variable, 0), %this.value);
+		setGlobalByName(%variable, %this.value);
 
     %this.onLoad(%val);
   }
@@ -495,8 +491,16 @@ function Preference::updateValue(%this, %value, %updater) {
 	}
 
   %this.value = %value;
-
 	%this.onUpdate(%value, %updater);
+
+  for(%j = 0; %j < ClientGroup.getCount(); %j++) {
+    %client = ClientGroup.getObject(%j);
+
+    if(%client.hasPrefSystem && %client.BLP_isAllowedUse()) {
+      commandToClient(%client, 'updateBLPref', %this.variable, %this.value);
+    }
+  }
+
   return true;
 }
 
@@ -612,7 +616,6 @@ function Preference::validateValue(%this, %value) {
 //================================================================
 
 function Preference::onUpdate(%this, %val, %client) {
-  echo("Preference::onUpdate");
   if(%this.updateCallback !$= "") {
     eval(%this.updateCallback @ "(%this, %val, %client);");
   }
