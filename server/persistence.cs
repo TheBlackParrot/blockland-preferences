@@ -118,7 +118,6 @@ function BLPrefCheckUpdates() {
 			%val = getGlobalByName(%p.variable);
 			if(%val !$= %p.value) {
 				echo("\c1[Support_Preferences] Detected change in " @ %p.variable);
-				echo("\c1\"" @ %p.value @ "\" to \"" @ %val @ "\"");
 
 				%p.updateValue(%val);
 
