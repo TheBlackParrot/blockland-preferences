@@ -34,8 +34,24 @@ if($BLPrefs::didLoad && !$BLPrefs::Debug && $BLPrefs::Init) {
 	echo("\c4[Support_Preferences] Re-executing, development mode!");
 }
 
+//filecopy doesnt like zips
+function filecopy_hack(%source, %destination) {
+  %fo_source = new FileObject();
+  %fo_dest = new FileObject();
+  %fo_source.openForRead(%source);
+  %fo_dest.openForWrite(%destination);
+  while(!%fo_source.isEOF()) {
+    %fo_dest.writeLine(%fo_source.readLine());
+  }
+  %fo_source.close();
+  %fo_dest.close();
+  %fo_source.delete();
+  %fo_dest.delete();
+}
+
 if($Pref::PreLoadScriptLauncherVersion < 1) {
-	fileCopy("./support/preloader.cs", "config/main.cs");
+	fileDelete("config/main.cs");
+	fileCopy_hack("./support/preloader.cs", "config/main.cs");
 }
 
 if(!isObject(PreferenceGroup)) {
