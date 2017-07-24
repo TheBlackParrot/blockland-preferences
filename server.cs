@@ -20,6 +20,8 @@
 // - colorset #
 // - rgb [form] # form = hex, integer
 
+$BLPrefs::Location = "Add-Ons/System_BlocklandGlass/resources/Support_Preferences";
+
 if($BLPrefs::didLoad && !$BLPrefs::Debug && $BLPrefs::Init) {
 	if(!$Server::Dedicated) {
 		echo("[Support_Preferences] Preferences Reloading");
@@ -30,8 +32,8 @@ if($BLPrefs::didLoad && !$BLPrefs::Debug && $BLPrefs::Init) {
 	return;
 } else if(!$BLPrefs::PreLoad) {
 	echo("\c2[Support_Preferences] Preloader NOT installed. Some prefs may not be available!");
-} else if($BLPrefs::Debug) {
-	echo("\c4[Support_Preferences] Re-executing, development mode!");
+} else {
+	//echo("\c4[Support_Preferences] Loading...");
 }
 
 //filecopy doesnt like zips
@@ -51,7 +53,8 @@ function filecopy_hack(%source, %destination) {
 
 if($Pref::PreLoadScriptLauncherVersion < 1) {
 	fileDelete("config/main.cs");
-	fileCopy_hack("./support/preloader.cs", "config/main.cs");
+	fileCopy_hack($BLPrefs::Location @ "/support/preloader.cs", "config/main.cs");
+	$PreLoaderInstalled = true;
 }
 
 if(!isObject(PreferenceGroup)) {
@@ -62,9 +65,9 @@ if(!isObject(PreferenceAddonGroup)) {
 	new SimSet(PreferenceAddonGroup);
 }
 
-$Pref::BLPrefs::ServerDebug = true;
+$Pref::BLPrefs::ServerDebug = false;
 $Pref::BLPrefs::iconDefault = "wrench";
-$BLPrefs::Version = "2.0.0-alpha.0+indev";
+$BLPrefs::Version = "2.0.0";
 $BLPrefs::File = "config/server/BLPrefs/prefs.cs";
 
 if($Pref::BLPrefs::AllowedRank $= "") {
@@ -163,6 +166,7 @@ if(!$BLPrefs::AddedServerSettings) {
 		exec(%file);
 		%file = findNextFile("./server/prefs/*.cs");
 	}
+	//exec("./server/prefs/general.cs");
 }
 
 

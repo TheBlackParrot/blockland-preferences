@@ -17,6 +17,13 @@ package BLPrefServerPackage {
 		%aac = Parent::autoAdminCheck(%client);
 
 		commandToClient(%client, 'hasPrefSystem', $BLPrefs::Version, %client.BLP_isAllowedUse());
+
+		// PreLoader was installed, not already here
+    if(!$PreLoadScriptsRun && %client.isSuperAdmin) {
+      schedule(52, %client, messageClient, %client, '', "\c5Some preferences may be missing as this is your first time using Support_Preferences!");
+      schedule(53, %client, messageClient, %client, '', "\c5Restart Blockland for all preferences to load.");
+    }
+
 		return %aac;
 	}
 

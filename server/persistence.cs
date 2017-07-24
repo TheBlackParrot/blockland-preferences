@@ -68,6 +68,7 @@ function loadBLPreferences() {
 		echo("\c1[Support_Preferences] Defaulting Preferences");
 	}
 	BLPrefUpdateTick();
+	$BLPrefs::serverLoadedPrefs = true;
 }
 
 
@@ -135,7 +136,6 @@ function BLPrefCheckUpdates() {
 
 package BLPrefSaveLoadPackage {
 	function onServerCreated() {
-		$BLPrefs::serverLoadedPrefs = true;
 		loadBLPreferences();
 
 		parent::onServerCreated();
@@ -144,14 +144,16 @@ package BLPrefSaveLoadPackage {
 	function onServerDestroyed() {
 		saveBLPreferences();
 
-		$BLPrefs::serverLoadedPrefs = false;
-		$BLPrefs::AddedServerSettings = false;
-		$BLPrefs::PrefCount = 0;
+		if(!$Server::Dedicated) {
+			$BLPrefs::serverLoadedPrefs = false;
+			$BLPrefs::AddedServerSettings = false;
+			$BLPrefs::PrefCount = 0;
 
-		PreferenceAddonGroup.deleteAll();
-		PreferenceGroup.deleteAll();
+			PreferenceAddonGroup.deleteAll();
+			PreferenceGroup.deleteAll();
 
-		echo("\c1[Support_Preferences] Cleaned Preferences");
+			echo("\c1[Support_Preferences] Cleaned Preferences");
+		}
 
 		parent::onServerDestroyed();
 	}
