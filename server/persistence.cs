@@ -26,6 +26,11 @@ function findBLPref(%variable) {
 }
 
 function loadBLPreferences() {
+	if(!$BLPrefs::LoadedDefault) {
+		exec("config/server/prefs.cs");
+		$BLPrefs::LoadedDefault = true;
+	}
+
 	if(isFile($BLPrefs::File)) {
 		// echo("\c5[Support_Preferences] Loading BL Preferences...");
 
@@ -45,7 +50,10 @@ function loadBLPreferences() {
 			%variable = collapseEscape(getField(%line, 0));
 			%val      = collapseEscape(getField(%line, 1));
 
-			setGlobalByName(%variable, %val);
+			%valid = setGlobalByName(%variable, %val);
+
+			if(!%valid)
+				continue;
 
 			%newVariable = true;
 
@@ -97,7 +105,8 @@ function saveBLPreferences() {
 	%fo.close();
 	%fo.delete();
 
-	export("$Pref::Server::*", "config/server/prefs.cs");
+	if($BLPrefs::LoadedDefault)
+		export("$Pref::Server::*", "config/server/prefs.cs");
 
 	if(!isFile($BLPrefs::File)) {
 		echo("\c2[Support_Preferences] Failed to save preferences!");

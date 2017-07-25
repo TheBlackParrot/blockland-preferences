@@ -79,7 +79,9 @@ function Preference::onAdd(%this) {
       $BLPrefs::Pref[%id]      = %variable;
       $BLPrefs::PrefCount++;
 
-			setGlobalByName(%variable, %this.defaultValue);
+			%valid = setGlobalByName(%variable, %this.defaultValue);
+      if(!%valid)
+        echo("\c2" @ %variable @ " is not a valid variable name! Invalid preference!");
 
       %this.value = %this.defaultValue;
       %this.onDefault();
@@ -152,13 +154,19 @@ function Preference::forceLoad(%this) {
 		//default
     echo("Loading default for " @ %this @ " (" @ %this.defaultValue @ ")");
     %this.value = %this.defaultValue;
-		setGlobalByName(getWord(%variable, 0), %this.value);
+
+		%valid = setGlobalByName(getWord(%variable, 0), %this.value);
+    if(!%valid)
+      echo("\c2" @ %variable @ " is not a valid variable name! Invalid preference!");
 
     %this.onDefault(%this.value);
 	} else {
     echo("\c1Loaded " @ %variable @ " as " @ %val);
     %this.value = %val;
-		setGlobalByName(%variable, %this.value);
+
+		%valid = setGlobalByName(%variable, %this.value);
+    if(!%valid)
+      echo("\c2" @ %variable @ " is not a valid variable name! Invalid preference!");
 
     %this.onLoad(%val);
   }

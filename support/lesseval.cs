@@ -8,16 +8,29 @@
 
 // setGlobalByName safely sets a global variable given the string that defines it.
 // --------------------------------------
-function setGlobalByName(%global, %value) {
+function setGlobalByName(%global, %value, %unsafe) {
 	%firstLetter = getSubStr(%global, 0, 1);
 	%theRest = getSubStr(%global, 1, strLen(%global)-1);
-	
+
 	if(%firstLetter $= "$") {
 		return setGlobalByName(%theRest, %value);
 	}
-	
+
+	// Remove array types
+
+	// Global Name Valid - Export safe only!
+	if(!%unsafe) {
+		%allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_:";
+		for(%i = 0; %i < strLen(%global); %i++) {
+			if(strPos(%allowed, getSubStr(%global, %i, 1)) < 0) {
+				echo("Invalid " @ getSubStr(%global, %i, 1) @ " in " @ %global);
+				return false;
+			}
+		}
+	}
+
 	// IT CAN BE DONE WITHOUT EVAL GOD DAMN IT
-	
+
 	switch$ (%firstLetter)
 	{
 		case "a":
@@ -127,6 +140,8 @@ function setGlobalByName(%global, %value) {
 		case "_":
 			$_[%theRest] = %value;
 	}
+
+	return true;
 }
 
 // getGlobalByName gives you the value of any global.
@@ -134,13 +149,13 @@ function setGlobalByName(%global, %value) {
 function getGlobalByName(%global) {
 	%firstLetter = getSubStr(%global, 0, 1);
 	%theRest = getSubStr(%global, 1, strLen(%global)-1);
-	
+
 	if(%firstLetter $= "$") {
 		return getGlobalByName(%theRest);
 	}
-	
+
 	// IT CAN BE DONE WITHOUT EVAL GOD DAMN IT
-	
+
 	switch$ (%firstLetter)
 	{
 		case "a":
