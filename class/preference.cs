@@ -467,6 +467,18 @@ function Preference::_validateDefault(%this) {
       }
 
       %this.defaultValue = strreplace(%prefsAsFields, "" TAB "", %this.delimiter);
+
+    case "rgb":
+      %hasAlpha = %this.params;
+      if(%hasAlpha) {
+        if(getWordCount(%this.defaultValue) < 4) {
+          %this.defaultValue = "255 0 255 255";
+        }
+      } else {
+        if(getWordCount(%this.defaultValue) < 3) {
+          %this.defaultValue = "255 0 255";
+        }
+      }
   }
   return true;
 }

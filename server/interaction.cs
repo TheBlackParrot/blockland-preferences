@@ -91,6 +91,8 @@ function serverCmdUpdatePref(%client, %id, %newValue, %announce) {
 				%displayValue = %pso.valueName[%newValue];
 			} else if(%pso.type $= "checkbox" || %pso.type $= "bool") {
 				%displayValue = (%newValue ? "true" : "false");
+			} else if(%pso.type $= "rgb") {
+				%displayValue = "<color:" @ rgbToHex(%newValue) @ ">COLOR";
 			} else {
 				%displayValue = expandEscape(%newValue);
 			}

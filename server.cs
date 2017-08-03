@@ -67,7 +67,7 @@ if(!isObject(PreferenceAddonGroup)) {
 
 $Pref::BLPrefs::ServerDebug = false;
 $Pref::BLPrefs::iconDefault = "wrench";
-$BLPrefs::Version = "2.0.0";
+$BLPrefs::Version = "2.0.1";
 $BLPrefs::File = "config/server/BLPrefs/prefs.cs";
 
 if($Pref::BLPrefs::AllowedRank $= "") {
