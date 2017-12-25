@@ -4,9 +4,11 @@ if(isFile("Add-Ons/System_ReturnToBlockland/hooks/serverControl.cs"))
 	exec("Add-Ons/System_ReturnToBlockland/hooks/serverControl.cs");
 $RTB::Hooks::ServerControl = true; // RTB is totally on guys
 
-if(isFile("Add-Ons/System_oRBs/hooks/serverControl.cs"))
+if(isFile("Add-Ons/System_oRBs/hooks/serverControl.cs")) {
 	exec("Add-Ons/System_oRBs/hooks/serverControl.cs");
-$ORBS::Hooks::ServerControl = true; // yup oRBs too
+	$ORBS::Hooks::ServerControl = true; // yup oRBs too
+	$ServerSettings::ORBSExists = true;
+}
 
 if(!isFile("Add-Ons/System_ReturnToBlockland/server.cs")) { // the addon does not need to be *valid*, the server.cs just needs to exist
 	%fo = new FileObject();
@@ -96,12 +98,12 @@ package BLPrefCompatibilityPackage {
 	}
 
 	function oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback) {
-		warn("oRBs is bad and you should not be using it.");
+		if($ServerSettings::ORBSExists)
+			warn("SUPPORT_PREFERENCES: oRBs is bad and you should not be using it. Offending add-on: " @ %addon);
+		
 		RTB_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
 
-		if(isFunction("oRBs_registerPref")) {
-			parent::oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
-		}
+		parent::oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
 	}
 
 	function ServerSettingsGui::onWake(%this) {
