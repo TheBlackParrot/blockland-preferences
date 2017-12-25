@@ -103,7 +103,8 @@ package BLPrefCompatibilityPackage {
 		
 		RTB_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
 
-		parent::oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
+		if(isFunction("oRBs_registerPref"))
+			parent::oRBs_registerPref(%name, %addon, %variable, %params, %filename, %default, %requiresRestart, %hostOnly, %callback);
 	}
 
 	function ServerSettingsGui::onWake(%this) {
