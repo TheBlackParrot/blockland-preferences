@@ -521,6 +521,8 @@ function Preference::updateValue(%this, %value, %updater) {
     }
   }
 
+  saveBLPreferences();
+
   return true;
 }
 
