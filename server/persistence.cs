@@ -27,20 +27,32 @@ function findBLPref(%variable) {
 
 function loadBLPreferences() {
 	if(!$BLPrefs::LoadedDefault) {
+		echo("\c5[Support_Preferences] Loading Blockland Prefs...");
 		exec("config/server/prefs.cs");
 		$BLPrefs::LoadedDefault = true;
+
+		fileCopy("config/server/prefs.cs", "config/server/prefs.cs.backup");
 	}
 
 	if(isFile($BLPrefs::File)) {
-		// echo("\c5[Support_Preferences] Loading BL Preferences...");
 
-		if(!isFile(%backup = "config/server/BLPrefs/prefs.backup")) {
-			echo("\c1[Support_Preferences] Backing up preferences file...");
+		if(!isFile(%backup = ($BLPrefs::File @ ".backup"))) {
+			echo("\c1[Support_Preferences] Backing up add-on preferences file...");
+
+			for(%i = 5; %i > 0 ; %i--) {
+				if(isFile(%backup @ "." @ %i)) {
+					if(%i == 5) {
+						fileDelete(%backup @ ".5");
+					} else {
+						fileCopy(%backup @ "." @ %i, %backup @ "." @ (%i+1));
+					}
+				}
+			}
+
 			fileCopy($BLPrefs::File, %backup);
 		}
 
-
-		echo("\c1[Support_Preferences] Loading preferences...");
+		echo("\c5[Support_Preferences] Loading Add-On Preferences...");
 
 		// load all preferences from file and save them so they aren't deleted if their respective addon is disabled
 		%fo = new FileObject();
@@ -89,7 +101,7 @@ function saveBLPreferences() {
 		return;
 	}
 
-	// echo("\c5[Support_Preferences] Saving BL Preferences...");
+	echo("\c5[Support_Preferences] Saving BL Preferences...");
 
 	%fo = new FileObject();
 	%fo.openForWrite($BLPrefs::File);

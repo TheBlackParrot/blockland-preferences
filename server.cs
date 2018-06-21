@@ -27,7 +27,6 @@ if($BLPrefs::didLoad && !$BLPrefs::Debug && $BLPrefs::Init) {
 		echo("[Support_Preferences] Preferences Reloading");
 		activatePackage(BLPrefCompatibilityPackage);
 		prunePrefs();
-		registerServerSettingPrefs();
 	}
 	return;
 } else if(!$BLPrefs::PreLoad) {
@@ -67,7 +66,7 @@ if(!isObject(PreferenceAddonGroup)) {
 
 $Pref::BLPrefs::ServerDebug = false;
 $Pref::BLPrefs::iconDefault = "wrench";
-$BLPrefs::Version = "2.0.3";
+$BLPrefs::Version = "2.0.4";
 $BLPrefs::File = "config/server/BLPrefs/prefs.cs";
 
 if($Pref::BLPrefs::AllowedRank $= "") {
@@ -169,8 +168,8 @@ if(!$BLPrefs::AddedServerSettings) {
 	//exec("./server/prefs/general.cs");
 }
 
-
 loadBLPreferences();
+registerServerSettingPrefs();
 
 $BLPrefs::Init = true;
 $BLPrefs::didLoad = true;

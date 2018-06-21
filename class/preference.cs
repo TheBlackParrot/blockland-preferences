@@ -89,7 +89,7 @@ function Preference::onAdd(%this) {
   	} else {
       //value was loaded, set it
       %this.value = getGlobalByName(%variable);
-      %this.onLoad();
+      %this.onLoad(%this.value);
       %this._loaded = true;
     }
   } else {
